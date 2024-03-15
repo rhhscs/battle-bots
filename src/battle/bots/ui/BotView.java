@@ -5,6 +5,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileView;
 import java.awt.GridBagConstraints;
@@ -45,6 +48,9 @@ public class BotView extends JPanel {
         GridBagConstraints constraints = new GridBagConstraints();
 
         // Bot list
+        ListSelectionModel model = this.botList.getSelectionModel();
+        model.addListSelectionListener(new BotListSelectionListener());
+
         JScrollPane scrollPane = new JScrollPane(this.botList);
 
         constraints.gridx = 0;
@@ -96,6 +102,7 @@ public class BotView extends JPanel {
             }
         }
     }
+
     /**
      * Filters results for the {@link JFileChooser}.
      * @author Harry Xu
@@ -132,6 +139,26 @@ public class BotView extends JPanel {
         @Override
         public String getDescription() {
             return "Java Source Files (.java)";
+        }
+    }
+
+    private class BotListSelectionListener implements ListSelectionListener {
+        /**
+         * Called whenever the value of the selection changes.
+         *
+         * @param e the event that characterizes the change.
+         */
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            ListSelectionModel model = (ListSelectionModel) e.getSource();
+
+            if (!e.getValueIsAdjusting()) {
+                if (model.isSelectionEmpty()) {
+                    onSelect.accept(null);
+                } else {
+                    onSelect.accept(botList.getSelectedValue());
+                }
+            }
         }
     }
 }
