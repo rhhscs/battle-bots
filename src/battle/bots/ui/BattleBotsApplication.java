@@ -1,6 +1,6 @@
 package battle.bots.ui;
 
-import battle.bots.game.Player;
+import battle.bots.game.Bot;
 import battle.bots.loader.ObjectLoader;
 import battle.bots.loader.ObjectLoaderException;
 
@@ -136,21 +136,21 @@ public class BattleBotsApplication {
          */
         @Override
         public void actionPerformed(ActionEvent e) {
-            List<Player> players = new ArrayList<>();
+            List<Bot> bots = new ArrayList<>();
 
             for (Map.Entry<String, String> entry : botRegistry.entrySet()) {
                 // Remove .java extension
                 String className = entry.getKey().substring(0, entry.getKey().indexOf("."));
                 try {
-                    Player loadedPlayer = objectLoader.load(className, entry.getValue());
-                    players.add(loadedPlayer);
+                    Bot loadedBot = objectLoader.load(className, entry.getValue());
+                    bots.add(loadedBot);
                 } catch (IOException | ObjectLoaderException ex) {
                     System.out.println(ex.getMessage());
                 }
             }
 
-            System.out.println(players);
-            // TODO: pass players to game
+            System.out.println(bots);
+            // TODO: pass bots to game
         }
     }
 }
