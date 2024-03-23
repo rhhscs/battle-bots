@@ -1,6 +1,7 @@
 package battle.bots.ui;
 
-import battle.bots.game.Bot;
+import battle.bots.game.GamePanel;
+import battle.bots.game.objects.Bot;
 import battle.bots.loader.ObjectLoader;
 import battle.bots.loader.ObjectLoaderException;
 
@@ -9,13 +10,16 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -29,6 +33,7 @@ import java.util.Map;
  */
 public class BattleBotsApplication {
     private final JFrame frame;
+    private final JPanel mainPanel;
     private final Map<String, String> botRegistry;
     private final ObjectLoader objectLoader;
 
@@ -45,9 +50,9 @@ public class BattleBotsApplication {
         GridBagConstraints constraints = new GridBagConstraints();
 
         // Main Panel
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridBagLayout());
-        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        this.mainPanel = new JPanel();
+        this.mainPanel.setLayout(new GridBagLayout());
+        this.mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // BotView
         constraints.gridx = 0;
@@ -59,7 +64,7 @@ public class BattleBotsApplication {
         constraints.insets = new Insets(5, 5, 5, 5);
 
         BotView botView = new BotView(this::onUpload, this::onSelect);
-        mainPanel.add(botView, constraints);
+        this.mainPanel.add(botView, constraints);
 
         // CodeView
         constraints.gridx = 1;
@@ -67,16 +72,16 @@ public class BattleBotsApplication {
         constraints.gridheight = 1;
 
         this.codeView = new CodeView();
-        mainPanel.add(this.codeView, constraints);
+        this.mainPanel.add(this.codeView, constraints);
 
         // Start
         constraints.gridx = 1;
         constraints.gridy = 1;
         JButton startButton = new JButton("Start!");
         startButton.addActionListener(new OnStartListener());
-        mainPanel.add(startButton, constraints);
+        this.mainPanel.add(startButton, constraints);
 
-        this.frame.add(mainPanel, BorderLayout.CENTER);
+        this.frame.add(this.mainPanel, BorderLayout.CENTER);
     }
 
     /** Starts the application. */
@@ -94,14 +99,15 @@ public class BattleBotsApplication {
             String filename = file.getName();
 
             try {
-                String content = Files.readString(file.toPath());
+                byte[] bytes = Files.readAllBytes(file.toPath());
+                String content = new String(bytes, StandardCharsets.UTF_8);
                 this.botRegistry.put(filename, content);
             } catch (IOException e) {
                 System.out.println("Exception occurred whilst trying to read file '" + filename + "'.");
             }
         }
 
-        return this.botRegistry.keySet().stream().toList();
+        return new ArrayList<>(this.botRegistry.keySet());
     }
 
     /**
@@ -150,7 +156,19 @@ public class BattleBotsApplication {
             }
 
             System.out.println(bots);
-            // TODO: pass bots to game
+
+
+            frame.remove(mainPanel);
+
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            GamePanel gamePanel = new GamePanel(bots, screenSize);
+
+            frame.add(gamePanel, BorderLayout.CENTER);
+            frame.setSize(screenSize);
+            frame.revalidate();
+            frame.repaint();
+
+            gamePanel.start();
         }
     }
 }

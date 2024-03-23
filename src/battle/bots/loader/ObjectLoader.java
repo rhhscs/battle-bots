@@ -1,6 +1,6 @@
 package battle.bots.loader;
 
-import battle.bots.game.Bot;
+import battle.bots.game.objects.Bot;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -11,13 +11,14 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 /**
  * Class for compiling, loading, and instantiating submitted {@link Bot} classes.
  * @author Harry Xu
  * @version 1.0 - March 15th 2024
- * */
+ */
 public class ObjectLoader {
     private final JavaCompiler compiler;
     private final File root;
@@ -42,7 +43,7 @@ public class ObjectLoader {
     public Bot load(String className, String code) throws IOException, ObjectLoaderException {
         // Create temporary source file
         File sourceFile = new File(this.root, className + ".java");
-        Files.writeString(sourceFile.toPath(), code);
+        Files.write(sourceFile.toPath(), code.getBytes(StandardCharsets.UTF_8));
 
         OutputStream errStream = new ByteArrayOutputStream();
 
