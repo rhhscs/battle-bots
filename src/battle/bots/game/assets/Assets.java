@@ -1,9 +1,4 @@
-package battle.bots.game;
-
-import battle.bots.game.assets.BulletAssets;
-import battle.bots.game.assets.ObstacleAssets;
-import battle.bots.game.assets.PlayerAssets;
-import battle.bots.game.assets.TileAssets;
+package battle.bots.game.assets;
 
 import javax.imageio.ImageIO;
 import java.awt.Image;
