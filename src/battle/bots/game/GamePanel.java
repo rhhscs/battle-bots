@@ -1,5 +1,8 @@
 package battle.bots.game;
 
+import battle.bots.game.actions.Action;
+import battle.bots.game.actions.Move;
+import battle.bots.game.actions.Shoot;
 import battle.bots.game.objects.GameObject;
 
 import javax.swing.JPanel;
@@ -7,6 +10,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Timer;
@@ -82,7 +86,55 @@ public class GamePanel extends JPanel {
      * Runs an update cycle on the map
      */
     public void runUpdate() {
-        // TODO: Implement
+        for (int y = 0; y < this.map.length; y++) {
+            for (int x = 0; x < this.map[y].length; x++) {
+                GameObject currentObj = this.map[y][x];
+
+                if (currentObj == null) {
+                    continue;
+                }
+
+                if (currentObj instanceof Bot) {
+                    Bot bot = (Bot) currentObj;
+                    Map map = new Map(this.map, bot, new Point(x, y));
+
+                    this.handlePlayer(bot, map);
+                }
+            }
+        }
+    }
+
+    public void handlePlayer(Bot bot, Map map) {
+        Action action = bot.update(map);
+        Point position = map.getPosition();
+
+        if (action == null) {
+            return;
+        }
+
+        if (action instanceof Move) {
+            Move move = (Move) action;
+
+            // TODO
+            switch (move.getDirection()) {
+                case NORTH: {
+                    break;
+                }
+                case SOUTH: {
+                    break;
+                }
+                case EAST: {
+                    break;
+                }
+                case WEST: {
+                    break;
+                }
+            }
+        } else if (action instanceof Shoot) {
+            Shoot shoot = (Shoot) action;
+
+            // TODO: spawn bullet
+        }
     }
 
     /**

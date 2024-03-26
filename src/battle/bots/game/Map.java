@@ -15,10 +15,16 @@ import java.util.List;
 public class Map {
     private final GameObject[][] map;
     private final Bot bot;
+    private final Point botPosition;
 
-    public Map(GameObject[][] map, Bot bot) {
+    public Map(GameObject[][] map, Bot bot, Point botPosition) {
         this.map = map;
         this.bot = bot;
+        this.botPosition = botPosition;
+    }
+
+    public Point getPosition() {
+        return this.botPosition;
     }
 
     public Move pathfind(Point dest) {
