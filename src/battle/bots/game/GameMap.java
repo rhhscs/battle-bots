@@ -12,12 +12,12 @@ import java.util.List;
  * @author Harry Xu
  * @version 1.0 - March 24th 2024
  */
-public class Map {
+public class GameMap {
     private final GameObject[][] map;
     private final Bot bot;
     private final Point botPosition;
 
-    public Map(GameObject[][] map, Bot bot, Point botPosition) {
+    public GameMap(GameObject[][] map, Bot bot, Point botPosition) {
         this.map = map;
         this.bot = bot;
         this.botPosition = botPosition;

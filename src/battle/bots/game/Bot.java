@@ -113,10 +113,10 @@ public abstract class Bot extends GameObject {
 
     /**
      * Called by the game to update the state of the player.
-     * @param map a {@link Map} object which provides map-related functionality
+     * @param gameMap a {@link GameMap} object which provides map-related functionality
      * @return an {@link Action} representing the action of the player
      */
-    public abstract Action update(Map map);
+    public abstract Action update(GameMap gameMap);
 
     /**
      * Draws the {@link GameObject} at the specified location.

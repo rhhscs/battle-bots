@@ -4,6 +4,7 @@ import battle.bots.game.actions.Action;
 import battle.bots.game.actions.Move;
 import battle.bots.game.actions.Shoot;
 import battle.bots.game.objects.GameObject;
+import org.w3c.dom.css.Rect;
 
 import javax.swing.JPanel;
 import java.awt.Color;
@@ -12,7 +13,9 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -86,6 +89,8 @@ public class GamePanel extends JPanel {
      * Runs an update cycle on the map
      */
     public void runUpdate() {
+        Map<Point, Bot> moveRegistry = new HashMap<>();
+
         for (int y = 0; y < this.map.length; y++) {
             for (int x = 0; x < this.map[y].length; x++) {
                 GameObject currentObj = this.map[y][x];
@@ -96,17 +101,19 @@ public class GamePanel extends JPanel {
 
                 if (currentObj instanceof Bot) {
                     Bot bot = (Bot) currentObj;
-                    Map map = new Map(this.map, bot, new Point(x, y));
+                    GameMap gameMap = new GameMap(this.map, bot, new Point(x, y));
 
-                    this.handlePlayer(bot, map);
+                    Rectangle rect = new Rectangle(10, 10, 10, 10);
+
+                    this.handlePlayer(bot, gameMap);
                 }
             }
         }
     }
 
-    public void handlePlayer(Bot bot, Map map) {
-        Action action = bot.update(map);
-        Point position = map.getPosition();
+    public void handlePlayer(Bot bot, GameMap gameMap) {
+        Action action = bot.update(gameMap);
+        Point position = gameMap.getPosition();
 
         if (action == null) {
             return;
