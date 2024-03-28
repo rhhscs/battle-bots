@@ -23,6 +23,17 @@ public class GameMap {
         this.botPosition = botPosition;
     }
 
+    public int getHeight() {
+        return map.length;
+    }
+
+    public int getWidth() {
+        if (map.length == 0){
+            return 0;
+        }
+        return map[0].length;
+    }
+
     public Point getPosition() {
         return this.botPosition;
     }

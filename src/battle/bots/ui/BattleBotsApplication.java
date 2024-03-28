@@ -161,7 +161,7 @@ public class BattleBotsApplication {
             frame.remove(mainPanel);
 
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            GamePanel gamePanel = new GamePanel(bots, screenSize);
+            GamePanel gamePanel = new GamePanel(bots);
 
             frame.add(gamePanel, BorderLayout.CENTER);
             frame.setSize(screenSize);

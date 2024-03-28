@@ -32,13 +32,14 @@ public class GamePanel extends JPanel {
     private final Timer gameLoop;
 
     private int currentCycle;
-    private final int gridSize;
 
-    public GamePanel(List<Bot> bots, Dimension panelSize) {
+    private Camera camera = new Camera();
+
+    public GamePanel(List<Bot> bots) {
         // Game map dimensions
         int gridHeight = (int) Math.floor(
                 Math.sqrt(
-                        bots.size() * Const.TILES_PER_PLAYER * panelSize.height / (double) panelSize.width
+                        bots.size() * Const.TILES_PER_PLAYER 
                 )
         );
 
@@ -50,8 +51,7 @@ public class GamePanel extends JPanel {
             gridHeight = Const.MAX_HEIGHT;
         }
 
-        this.gridSize = panelSize.height / gridHeight;
-        int gridWidth = panelSize.width / this.gridSize;
+        int gridWidth = (int)(Const.TILE_SIZE / Const.TILE_ASPECT_RATIO);
         this.map = new GameObject[gridHeight - 2][gridWidth];
         this.mapTiles = new Image[gridHeight - 2][gridWidth];
         this.bullets = new HashSet<>();
@@ -59,7 +59,7 @@ public class GamePanel extends JPanel {
 
         for (Bot bot : bots) {
             // TODO: make position generation random
-            bot.setHitbox(new Rectangle(0, 0, this.gridSize, this.gridSize));
+            bot.setHitbox(new Rectangle(0, 0, Const.TILE_SIZE, Const.TILE_SIZE));
         }
 
         this.gameLoop = new Timer();
@@ -178,16 +178,17 @@ public class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        camera.process(g);
 
         // Draw background tiles
         g.setColor(Color.BLUE);
 
         for (int y = 0; y < this.map.length; y++) {
             for (int x = 0; x < this.map[y].length; x++) {
-                int xCoord = x * this.gridSize;
-                int yCoord = y * this.gridSize;
+                int xCoord = x * Const.TILE_SIZE;
+                int yCoord = y * Const.TILE_SIZE;
 
-                g.drawRect(xCoord, yCoord, this.gridSize, this.gridSize);
+                g.drawRect(xCoord, yCoord, Const.TILE_SIZE, Const.TILE_SIZE);
             }
         }
 
@@ -200,12 +201,13 @@ public class GamePanel extends JPanel {
                     continue;
                 }
 
-                int xCoord = x * this.gridSize;
-                int yCoord = y * this.gridSize;
+                int xCoord = x * Const.TILE_SIZE;
+                int yCoord = y * Const.TILE_SIZE;
 
                 currentObject.draw(g, xCoord, yCoord);
             }
         }
+
     }
 
     /**
