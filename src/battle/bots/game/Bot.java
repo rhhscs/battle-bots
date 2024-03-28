@@ -3,6 +3,7 @@ package battle.bots.game;
 import battle.bots.game.actions.Action;
 import battle.bots.game.objects.GameObject;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -22,9 +23,12 @@ public abstract class Bot extends GameObject {
     private int health;
     private int range;
 
+    private final Color color;
+
     public Bot() {
         this.health = DEFAULT_HEALTH;
         this.range = DEFAULT_RANGE;
+        color = new Color((float)Math.random(), (float)Math.random(), (float)Math.random());
     }
 
     /**
@@ -126,6 +130,8 @@ public abstract class Bot extends GameObject {
      */
     @Override
     public void draw(Graphics g, int x, int y) {
+        g.setColor(color);
+        g.fillRect(x, y, Const.TILE_SIZE, Const.TILE_SIZE);
 //        Image sprite = this.sprites[this.currentSprite];
 //        g.drawImage(sprite, x, y, null);
     }

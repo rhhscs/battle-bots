@@ -5,6 +5,7 @@ import battle.bots.game.actions.Move;
 import battle.bots.game.actions.Shoot;
 import battle.bots.game.objects.Bullet;
 import battle.bots.game.objects.GameObject;
+import battle.bots.game.objects.Obstacle;
 import battle.bots.game.util.ImmutablePoint;
 import org.w3c.dom.css.Rect;
 
@@ -15,6 +16,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +30,6 @@ import java.util.TimerTask;
 public class GamePanel extends JPanel {
     private final GameObject[][] map;
     private final Set<Bullet> bullets;
-    private final Image[][] mapTiles;
 
     private final Timer gameLoop;
 
@@ -52,10 +54,14 @@ public class GamePanel extends JPanel {
         }
 
         int gridWidth = (int)(Const.TILE_SIZE / Const.TILE_ASPECT_RATIO);
-        this.map = new GameObject[gridHeight - 2][gridWidth];
-        this.mapTiles = new Image[gridHeight - 2][gridWidth];
+        this.map = new GameObject[gridHeight][gridWidth];
         this.bullets = new HashSet<>();
         this.currentCycle = 1;
+
+        //TODO remove
+        for (int i = 0; i < 20; i++) {
+            map[(int)(Math.random()*gridHeight)][(int)(Math.random()*gridWidth)] = new Obstacle();
+        }
 
         for (Bot bot : bots) {
             // TODO: make position generation random
@@ -63,6 +69,7 @@ public class GamePanel extends JPanel {
         }
 
         this.gameLoop = new Timer();
+        this.addComponentListener(new ResizeListener());
     }
 
     /**
@@ -70,6 +77,7 @@ public class GamePanel extends JPanel {
      * Starts the game.
      */
     public void start() {
+        camera.setScale(map, this.getSize(), Mode.FIT);
         this.gameLoop.schedule(new GameLoopTask(), 0, Const.MS_PER_TICK);
     }
 
@@ -207,7 +215,7 @@ public class GamePanel extends JPanel {
                 currentObject.draw(g, xCoord, yCoord);
             }
         }
-
+        
     }
 
     /**
@@ -232,6 +240,13 @@ public class GamePanel extends JPanel {
             }
 
             runTick();
+        }
+    }
+
+    private class ResizeListener extends ComponentAdapter {
+        @Override
+        public void componentResized(ComponentEvent e) {
+            camera.setScale(map, getSize(), Mode.FIT);
         }
     }
 }
