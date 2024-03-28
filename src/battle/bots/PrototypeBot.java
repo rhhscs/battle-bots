@@ -1,5 +1,3 @@
-package battle.bots;
-
 import battle.bots.game.Bot;
 import battle.bots.game.GameMap;
 import battle.bots.game.actions.Action;

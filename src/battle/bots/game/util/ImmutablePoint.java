@@ -1,5 +1,6 @@
 package battle.bots.game.util;
 
+import java.awt.Point;
 import java.util.Objects;
 
 /**
@@ -16,6 +17,10 @@ public final class ImmutablePoint {
     public ImmutablePoint(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public ImmutablePoint(Point point) {
+        this(point.x, point.y);
     }
 
     public int getX() {

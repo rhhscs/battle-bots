@@ -3,7 +3,9 @@ package battle.bots.game;
 import battle.bots.game.actions.Action;
 import battle.bots.game.actions.Move;
 import battle.bots.game.actions.Shoot;
+import battle.bots.game.objects.Bullet;
 import battle.bots.game.objects.GameObject;
+import battle.bots.game.util.ImmutablePoint;
 import org.w3c.dom.css.Rect;
 
 import javax.swing.JPanel;
@@ -13,14 +15,18 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class GamePanel extends JPanel {
     private final GameObject[][] map;
+    private final Set<Bullet> bullets;
     private final Image[][] mapTiles;
 
     private final Timer gameLoop;
@@ -48,6 +54,7 @@ public class GamePanel extends JPanel {
         int gridWidth = panelSize.width / this.gridSize;
         this.map = new GameObject[gridHeight - 2][gridWidth];
         this.mapTiles = new Image[gridHeight - 2][gridWidth];
+        this.bullets = new HashSet<>();
         this.currentCycle = 1;
 
         for (Bot bot : bots) {
@@ -89,7 +96,7 @@ public class GamePanel extends JPanel {
      * Runs an update cycle on the map
      */
     public void runUpdate() {
-        Map<Point, Bot> moveRegistry = new HashMap<>();
+        Map<ImmutablePoint, List<Bot>> moveRegistry = new HashMap<>();
 
         for (int y = 0; y < this.map.length; y++) {
             for (int x = 0; x < this.map[y].length; x++) {
@@ -103,20 +110,34 @@ public class GamePanel extends JPanel {
                     Bot bot = (Bot) currentObj;
                     GameMap gameMap = new GameMap(this.map, bot, new Point(x, y));
 
-                    Rectangle rect = new Rectangle(10, 10, 10, 10);
+                    ImmutablePoint newPos = this.handlePlayer(bot, gameMap);
 
-                    this.handlePlayer(bot, gameMap);
+                    moveRegistry.putIfAbsent(newPos, new ArrayList<>());
+                    moveRegistry.get(newPos).add(bot);
                 }
             }
         }
+
+        for (Map.Entry<ImmutablePoint, List<Bot>> entry : moveRegistry.entrySet()) {
+
+        }
     }
 
-    public void handlePlayer(Bot bot, GameMap gameMap) {
+    public boolean positionIsValid(ImmutablePoint point) {
+        if (point == null) {
+            throw new NullPointerException("Parameter `point` cannot be null.");
+        }
+
+		// TODO
+		return false;
+    }
+
+    public ImmutablePoint handlePlayer(Bot bot, GameMap gameMap) {
         Action action = bot.update(gameMap);
         Point position = gameMap.getPosition();
 
         if (action == null) {
-            return;
+            return new ImmutablePoint(position);
         }
 
         if (action instanceof Move) {
@@ -125,16 +146,19 @@ public class GamePanel extends JPanel {
             // TODO
             switch (move.getDirection()) {
                 case NORTH: {
-                    break;
+                    return new ImmutablePoint(position.x, position.y - 1);
                 }
                 case SOUTH: {
-                    break;
+                    return new ImmutablePoint(position.x, position.y + 1);
                 }
                 case EAST: {
-                    break;
+                    return new ImmutablePoint(position.x - 1, position.y);
                 }
                 case WEST: {
-                    break;
+                    return new ImmutablePoint(position.x + 1, position.y);
+                }
+                default: {
+                    throw new IllegalStateException("Move direction must be either NORTH, SOUTH, EAST, or WEST");
                 }
             }
         } else if (action instanceof Shoot) {
@@ -142,6 +166,9 @@ public class GamePanel extends JPanel {
 
             // TODO: spawn bullet
         }
+
+		// TODO: should return the position of the player after the move
+		return null;
     }
 
     /**
