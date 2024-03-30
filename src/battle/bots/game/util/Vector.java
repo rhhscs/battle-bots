@@ -53,6 +53,23 @@ public class Vector {
         }
     }
 
+    public Vector scale(double factor) {
+        return new Vector(
+            this.x * factor,
+            this.y * factor
+        );
+    }
+
+    public Vector normalize() {
+        double magnitude = this.getMagnitude();
+
+        return new Vector(
+            this.x / magnitude,
+            this.y / magnitude
+        );
+    }
+
+
     @Override
     public String toString() {
         return "Vector{" +

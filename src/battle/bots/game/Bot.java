@@ -1,14 +1,14 @@
 package battle.bots.game;
 
 import battle.bots.game.actions.Action;
-import battle.bots.game.objects.GameObject;
+import battle.bots.game.objects.UnpositionedGameObject;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
 
-public abstract class Bot extends GameObject {
+public abstract class Bot extends UnpositionedGameObject {
     private static final int DEFAULT_HEALTH = 10;
     private static final int DEFAULT_RANGE = 1;
 
@@ -18,7 +18,6 @@ public abstract class Bot extends GameObject {
     private int currentSprite;
     private Image[] sprites;
 
-    private Rectangle hitbox;
     private String name;
     private int health;
     private int range;
@@ -26,9 +25,10 @@ public abstract class Bot extends GameObject {
     private final Color color;
 
     public Bot() {
+        super(new Rectangle(0, 0, Const.TILE_SIZE, Const.TILE_SIZE));
         this.health = DEFAULT_HEALTH;
         this.range = DEFAULT_RANGE;
-        color = new Color((float)Math.random(), (float)Math.random(), (float)Math.random());
+        this.color = new Color((float) Math.random(), (float)Math.random(), (float)Math.random());
     }
 
     /**
@@ -55,19 +55,6 @@ public abstract class Bot extends GameObject {
         }
 
         this.health = health;
-    }
-
-    /**
-     * Sets the hitbox of the player.
-     * @param hitbox the new hitbox of the player
-     * @throws NullPointerException if {@code hitbox} is {@code null}
-     */
-    void setHitbox(Rectangle hitbox) {
-        if (hitbox == null) {
-            throw new NullPointerException("Parameter `hitbox` cannot be null.");
-        }
-
-        this.hitbox = hitbox;
     }
 
     /**
@@ -100,14 +87,6 @@ public abstract class Bot extends GameObject {
     }
 
     /**
-     * Gets the hitbox of the player.
-     * @return the hitbox
-     */
-    public Rectangle getHitbox() {
-        return this.hitbox;
-    }
-
-    /**
      * Gets the range of the player.
      * @return the range
      */
@@ -130,7 +109,7 @@ public abstract class Bot extends GameObject {
      */
     @Override
     public void draw(Graphics g, int x, int y) {
-        g.setColor(color);
+        g.setColor(this.color);
         g.fillRect(x, y, Const.TILE_SIZE, Const.TILE_SIZE);
 //        Image sprite = this.sprites[this.currentSprite];
 //        g.drawImage(sprite, x, y, null);
@@ -141,6 +120,6 @@ public abstract class Bot extends GameObject {
      */
     @Override
     public void tick() {
-        this.currentSprite = (this.currentSprite + 1) % this.sprites.length;
+//        this.currentSprite = (this.currentSprite + 1) % this.sprites.length;
     }
 }

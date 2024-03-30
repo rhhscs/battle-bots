@@ -31,6 +31,10 @@ public final class ImmutablePoint {
         return this.y;
     }
 
+    public Point toAWTPoint() {
+        return new Point(this.x, this.y);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {

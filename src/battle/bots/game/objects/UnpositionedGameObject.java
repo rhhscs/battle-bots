@@ -1,13 +1,15 @@
 package battle.bots.game.objects;
 
-import java.awt.Graphics;
+import battle.bots.game.GameObject;
 
-/**
- * Represents a game object in the game which can be drawn and animated
- * @author Harry Xu
- * @version 1.0 - March 24th 2024
- */
-public abstract class GameObject {
+import java.awt.Graphics;
+import java.awt.Rectangle;
+
+public abstract class UnpositionedGameObject extends GameObject {
+    protected UnpositionedGameObject(Rectangle hitbox) {
+        super(hitbox);
+    }
+
     /**
      * Draws the {@link GameObject} at the specified location.
      * @param g the {@link Graphics} object
@@ -15,9 +17,4 @@ public abstract class GameObject {
      * @param y the y coordinate of the top left corner of the drawing location
      */
     public abstract void draw(Graphics g, int x, int y);
-
-    /**
-     * Advances the sprite image
-     */
-    public abstract void tick();
 }

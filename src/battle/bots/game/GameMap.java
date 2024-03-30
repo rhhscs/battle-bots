@@ -2,7 +2,6 @@ package battle.bots.game;
 
 
 import battle.bots.game.actions.Move;
-import battle.bots.game.objects.GameObject;
 
 import java.awt.Point;
 import java.util.List;

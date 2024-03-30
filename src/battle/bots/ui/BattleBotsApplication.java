@@ -45,7 +45,7 @@ public class BattleBotsApplication {
         this.botRegistry = new LinkedHashMap<>();
         this.objectLoader = new ObjectLoader();
 
-        this.frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.setSize(800, 600);
         GridBagConstraints constraints = new GridBagConstraints();
 

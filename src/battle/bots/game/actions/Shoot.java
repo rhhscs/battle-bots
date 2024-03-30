@@ -1,13 +1,15 @@
 package battle.bots.game.actions;
 
-public class Shoot implements Action {
-    private final double angle;
+import battle.bots.game.util.Angle;
 
-    public Shoot(double angle) {
+public class Shoot implements Action {
+    private final Angle angle;
+
+    public Shoot(Angle angle) {
         this.angle = angle;
     }
 
-    public double getAngle() {
+    public Angle getAngle() {
         return this.angle;
     }
 }
