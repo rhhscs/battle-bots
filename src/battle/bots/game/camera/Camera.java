@@ -1,7 +1,7 @@
 package battle.bots.game.camera;
 
 import battle.bots.game.Const;
-import battle.bots.game.GameObject;
+import battle.bots.game.objects.GameObject;
 import battle.bots.game.objects.Bot;
 
 import java.awt.Dimension;

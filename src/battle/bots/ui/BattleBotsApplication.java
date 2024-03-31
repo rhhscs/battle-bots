@@ -1,6 +1,6 @@
 package battle.bots.ui;
 
-import battle.bots.game.GamePanel;
+import battle.bots.game.objects.GamePanel;
 import battle.bots.game.objects.Bot;
 import battle.bots.loader.ObjectLoader;
 import battle.bots.loader.ObjectLoaderException;

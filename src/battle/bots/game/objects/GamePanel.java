@@ -1,15 +1,14 @@
-package battle.bots.game;
+package battle.bots.game.objects;
 
+import battle.bots.game.Const;
+import battle.bots.game.GameMap;
 import battle.bots.game.actions.Action;
 import battle.bots.game.actions.Move;
 import battle.bots.game.actions.Shoot;
 import battle.bots.game.camera.Camera;
-import battle.bots.game.objects.Bot;
-import battle.bots.game.objects.Bullet;
-import battle.bots.game.objects.Obstacle;
-import battle.bots.game.objects.UnpositionedGameObject;
 import battle.bots.game.util.ImmutablePoint;
 import battle.bots.game.util.Pair;
+import battle.bots.game.util.Vector;
 
 import javax.swing.JPanel;
 import java.awt.Color;
@@ -67,7 +66,7 @@ public class GamePanel extends JPanel {
 
             x = y = 3;
 
-            this.map[y][x] = new Obstacle(new Rectangle(x, y, Const.TILE_SIZE, Const.TILE_SIZE));
+            this.map[y][x] = new Obstacle(new Rectangle(x * Const.TILE_SIZE, y * Const.TILE_SIZE, Const.TILE_SIZE, Const.TILE_SIZE));
         }
 
         for (Bot bot : bots) {
@@ -79,7 +78,7 @@ public class GamePanel extends JPanel {
 
             this.map[y][x] = bot;
 
-            Rectangle hitbox = ((GameObject) (bot)).getHitbox().getBounds();
+            Rectangle hitbox = bot.getHitbox().getBounds();
             hitbox.x = x;
             hitbox.y = y;
         }
@@ -169,19 +168,24 @@ public class GamePanel extends JPanel {
 
             // Get random player
             List<Pair<Bot, ImmutablePoint>> bots = entry.getValue();
-            Pair<Bot, ImmutablePoint> bot;
+            Pair<Bot, ImmutablePoint> botInfo;
 
             if (bots.size() > 1) {
                 int index = (int) (Math.random() * bots.size());
-                bot = bots.get(index);
+                botInfo = bots.get(index);
             } else {
-                bot = bots.get(0);
+                botInfo = bots.get(0);
             }
 
-            ImmutablePoint prevPosition = bot.getSecond();
+            ImmutablePoint prevPosition = botInfo.getSecond();
+            Bot bot = botInfo.getFirst();
 
             this.map[prevPosition.getY()][prevPosition.getX()] = null;
-            this.map[position.getY()][position.getX()] = bot.getFirst();
+            this.map[position.getY()][position.getX()] = bot;
+
+            // Update player hitbox
+            bot.getHitbox().x = position.getX() * Const.TILE_SIZE;
+            bot.getHitbox().y = position.getY() * Const.TILE_SIZE;
         }
     }
 
@@ -196,11 +200,11 @@ public class GamePanel extends JPanel {
             double bulletX = bullet.getX();
             double bulletY = bullet.getY();
 
-            int topGridX = (int) (bulletX - Bullet.SIZE) / Const.TILE_SIZE;
-            int topGridY = (int) (bulletY - Bullet.SIZE) / Const.TILE_SIZE;
+            int topGridX = (int) ((bulletX - Bullet.SIZE) / Const.TILE_SIZE);
+            int topGridY = (int) ((bulletY - Bullet.SIZE) / Const.TILE_SIZE);
 
-            int bottomGridX = (int) (bulletX + Bullet.SIZE) / Const.TILE_SIZE;
-            int bottomGridY = (int) (bulletY + Bullet.SIZE) / Const.TILE_SIZE;
+            int bottomGridX = (int) ((bulletX + Bullet.SIZE) / Const.TILE_SIZE);
+            int bottomGridY = (int) ((bulletY + Bullet.SIZE) / Const.TILE_SIZE);
 
             for (int y = topGridY; y <= bottomGridY; y++) {
                 for (int x = topGridX; x <= bottomGridX; x++) {
@@ -209,12 +213,31 @@ public class GamePanel extends JPanel {
                     }
 
                     UnpositionedGameObject gameObject = this.map[y][x];
+
                     if (gameObject instanceof Obstacle) {
                         Obstacle obstacle = (Obstacle) gameObject;
 
-                        // Looks kinda dumb but java visibility has forced my hand :(
+                        obstacle.collide(bullet);
                     }
                 }
+            }
+
+            Vector velocity = bullet.getVelocity();
+
+            if (bullet.getX() - Bullet.RADIUS < 0) {
+                velocity.setX(Math.abs(velocity.getX()));
+            }
+
+            if (bullet.getX() + Bullet.RADIUS > Const.TILE_SIZE * this.map[0].length) {
+                velocity.setX(-Math.abs(velocity.getX()));
+            }
+
+            if (bullet.getY() - Bullet.RADIUS < 0) {
+                velocity.setY(Math.abs(velocity.getY()));
+            }
+
+            if (bullet.getY() + Bullet.RADIUS > Const.TILE_SIZE * this.map.length) {
+                velocity.setY(-Math.abs(velocity.getY()));
             }
         }
     }
@@ -224,16 +247,10 @@ public class GamePanel extends JPanel {
             throw new NullPointerException("Parameter `point` cannot be null.");
         }
 
-        if (
-                point.getX() < 0 ||
-                        point.getY() < 0 ||
-                        point.getY() >= this.map.length ||
-                        point.getX() >= this.map[point.getY()].length
-        ) {
-            return false;
-        }
-
-        return true;
+        return point.getX() >= 0 &&
+                point.getY() >= 0 &&
+                point.getY() < this.map.length &&
+                point.getX() < this.map[point.getY()].length;
     }
 
     public boolean positionIsVacant(ImmutablePoint point) {
@@ -281,16 +298,15 @@ public class GamePanel extends JPanel {
             int gridX = (int) position.getX();
             int gridY = (int) position.getY();
 
-            // TODO: change this
             int x = gridX * Const.TILE_SIZE;
             int y = gridY * Const.TILE_SIZE;
 
-            int topLeftX = x - Const.TILE_SIZE / 2;
-            int topLeftY = y - Const.TILE_SIZE / 2;
+            int centerX = (int) (x + Bullet.RADIUS);
+            int centerY = (int) (y + Bullet.RADIUS);
 
-            Rectangle bulletHitbox = new Rectangle(topLeftX, topLeftY, Bullet.SIZE, Bullet.SIZE);
+            Rectangle bulletHitbox = new Rectangle(x, y, Bullet.SIZE, Bullet.SIZE);
 
-            this.bullets.add(new Bullet(bulletHitbox, x, y, shoot.getAngle()));
+            this.bullets.add(new Bullet(bulletHitbox, centerX, centerY, shoot.getAngle()));
         }
 
 		return new ImmutablePoint(position);

@@ -6,8 +6,8 @@ package battle.bots.game.util;
  * @version 1.0 - March 24th 2024
  */
 public class Vector {
-    private final double x;
-    private final double y;
+    private double x;
+    private double y;
 
     /**
      * Constructs a {@link Vector} with x and y components.
@@ -33,12 +33,24 @@ public class Vector {
         }
     }
 
+    public Vector(Vector vector) {
+        this(vector.x, vector.y);
+    }
+
     public double getX() {
         return this.x;
     }
 
     public double getY() {
         return this.y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
     }
 
     public double getMagnitude() {
@@ -54,33 +66,37 @@ public class Vector {
     }
 
     public Vector reflectX() {
-        return new Vector(
-            -this.x,
-            this.y
-        );
+        this.x = -this.x;
+
+        return this;
     }
 
     public Vector reflectY() {
-        return new Vector(
-                this.x,
-                -this.y
-        );
+        this.y = -this.y;
+
+        return this;
     }
 
     public Vector scale(double factor) {
-        return new Vector(
-            this.x * factor,
-            this.y * factor
-        );
+        this.x *= factor;
+        this.y *= factor;
+
+        return this;
     }
 
     public Vector normalize() {
         double magnitude = this.getMagnitude();
+        this.x /= magnitude;
+        this.y /= magnitude;
 
-        return new Vector(
-            this.x / magnitude,
-            this.y / magnitude
-        );
+        return this;
+    }
+
+    public Vector add(Vector other) {
+        this.x += other.x;
+        this.y += other.y;
+
+        return this;
     }
 
 

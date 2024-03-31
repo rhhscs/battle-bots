@@ -12,7 +12,7 @@ public class PrototypeBot extends Bot {
     public Action update(GameMap gameMap) {
         shoot = !shoot;
         if (shoot) {
-            return new Shoot(new Angle(45, Angle.Unit.DEGREE));
+            return new Shoot(new Angle(Math.random() * 360, Angle.Unit.DEGREE));
         } else {
             Move.Direction[] values = Move.Direction.values();
             return new Move(values[(int) (Math.random() * values.length)]);

@@ -1,7 +1,6 @@
 package battle.bots.game.objects;
 
 import battle.bots.game.Const;
-import battle.bots.game.GameObject;
 import battle.bots.game.util.Angle;
 import battle.bots.game.util.Vector;
 
@@ -10,9 +9,10 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 
 public class Bullet extends PositionedGameObject {
-    public static final int SIZE = Const.TILE_SIZE;
+    public static final int SIZE = Const.TILE_SIZE / 2;
+    public static final double RADIUS = SIZE / 2.0;
 
-    private static final double BULLET_SPEED = 3.0 / Const.S_PER_BULLET_MOVE;
+    private static final double BULLET_SPEED = 300.0 * Const.S_PER_BULLET_MOVE;
     private final Vector velocity;
 
     public Bullet(Rectangle hitbox, double x, double y, Angle angle) {
@@ -34,7 +34,11 @@ public class Bullet extends PositionedGameObject {
         this.setX(this.getX() + this.velocity.getX());
         this.setY(this.getY() + this.velocity.getY());
 
+        int topLeftX = (int) (this.getX() - RADIUS);
+        int topLeftY = (int) (this.getY() - RADIUS);
 
+        this.getHitbox().x = topLeftX;
+        this.getHitbox().y = topLeftY;
     }
 
     /**
@@ -45,7 +49,7 @@ public class Bullet extends PositionedGameObject {
     public void draw(Graphics g) {
         // TODO
         g.setColor(Color.BLACK);
-        g.fillOval((int) this.getX(), (int) this.getY(), SIZE, SIZE);
+        g.fillOval((int) (this.getX() - RADIUS), (int) (this.getY() - RADIUS), SIZE, SIZE);
     }
 
     /**

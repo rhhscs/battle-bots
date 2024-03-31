@@ -1,4 +1,4 @@
-package battle.bots.game;
+package battle.bots.game.objects;
 
 import java.awt.Rectangle;
 

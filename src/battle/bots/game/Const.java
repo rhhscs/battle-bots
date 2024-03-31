@@ -5,7 +5,7 @@ public class Const {
 
     /** Game constants */
     public static final int TICKS_PER_UPDATE = 4;
-    public static final int MS_PER_TICK = 100;
+    public static final int MS_PER_TICK = 25;
     public static final int MS_PER_UPDATE = MS_PER_TICK * TICKS_PER_UPDATE;
 
     public static final int UPDATES_PER_MOVE = 4;
