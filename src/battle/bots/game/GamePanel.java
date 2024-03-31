@@ -3,6 +3,8 @@ package battle.bots.game;
 import battle.bots.game.actions.Action;
 import battle.bots.game.actions.Move;
 import battle.bots.game.actions.Shoot;
+import battle.bots.game.camera.Camera;
+import battle.bots.game.objects.Bot;
 import battle.bots.game.objects.Bullet;
 import battle.bots.game.objects.Obstacle;
 import battle.bots.game.objects.UnpositionedGameObject;
@@ -62,6 +64,9 @@ public class GamePanel extends JPanel {
         for (int i = 0; i < 20; i++) {
             int x = (int) (Math.random() * gridWidth);
             int y = (int) (Math.random() * gridHeight);
+
+            x = y = 3;
+
             this.map[y][x] = new Obstacle(new Rectangle(x, y, Const.TILE_SIZE, Const.TILE_SIZE));
         }
 
@@ -70,9 +75,11 @@ public class GamePanel extends JPanel {
             int x = (int) (Math.random() * gridWidth);
             int y = (int) (Math.random() * gridHeight);
 
+            x = y = 1;
+
             this.map[y][x] = bot;
 
-            Rectangle hitbox = ((GameObject) (bot)).getHitbox();
+            Rectangle hitbox = ((GameObject) (bot)).getHitbox().getBounds();
             hitbox.x = x;
             hitbox.y = y;
         }
@@ -113,6 +120,20 @@ public class GamePanel extends JPanel {
      * Runs an update cycle on the map
      */
     public void runUpdate() {
+        this.currentCycle++;
+
+        if (this.currentCycle % Const.UPDATES_PER_MOVE == 0) {
+            this.updateBots();
+        }
+
+        if (this.currentCycle % Const.UPDATES_PER_BULLET_MOVE == 0) {
+            this.updateBullets();
+        }
+
+        this.checkCollisions();
+    }
+
+    public void updateBots() {
         Map<ImmutablePoint, List<Pair<Bot, ImmutablePoint>>> moveRegistry = new HashMap<>();
 
         for (int y = 0; y < this.map.length; y++) {
@@ -141,7 +162,7 @@ public class GamePanel extends JPanel {
             ImmutablePoint position = entry.getKey();
 
             // Randomly resolve location conflicts
-            if (!positionIsValid(position)) {
+            if (!this.positionIsVacant(position)) {
                 // TODO: maybe visual indicator if the player does an invalid move
                 continue;
             }
@@ -162,9 +183,39 @@ public class GamePanel extends JPanel {
             this.map[prevPosition.getY()][prevPosition.getX()] = null;
             this.map[position.getY()][position.getX()] = bot.getFirst();
         }
+    }
 
+    public void updateBullets() {
         for (Bullet bullet : this.bullets) {
             bullet.update();
+        }
+    }
+
+    public void checkCollisions() {
+        for (Bullet bullet : this.bullets) {
+            double bulletX = bullet.getX();
+            double bulletY = bullet.getY();
+
+            int topGridX = (int) (bulletX - Bullet.SIZE) / Const.TILE_SIZE;
+            int topGridY = (int) (bulletY - Bullet.SIZE) / Const.TILE_SIZE;
+
+            int bottomGridX = (int) (bulletX + Bullet.SIZE) / Const.TILE_SIZE;
+            int bottomGridY = (int) (bulletY + Bullet.SIZE) / Const.TILE_SIZE;
+
+            for (int y = topGridY; y <= bottomGridY; y++) {
+                for (int x = topGridX; x <= bottomGridX; x++) {
+                    if (!this.positionIsValid(new ImmutablePoint(x, y))) {
+                        continue;
+                    }
+
+                    UnpositionedGameObject gameObject = this.map[y][x];
+                    if (gameObject instanceof Obstacle) {
+                        Obstacle obstacle = (Obstacle) gameObject;
+
+                        // Looks kinda dumb but java visibility has forced my hand :(
+                    }
+                }
+            }
         }
     }
 
@@ -174,11 +225,21 @@ public class GamePanel extends JPanel {
         }
 
         if (
-            point.getX() < 0 ||
-            point.getY() < 0 ||
-            point.getY() > this.map.length ||
-            point.getX() > this.map[point.getY()].length
+                point.getX() < 0 ||
+                        point.getY() < 0 ||
+                        point.getY() >= this.map.length ||
+                        point.getX() >= this.map[point.getY()].length
         ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean positionIsVacant(ImmutablePoint point) {
+        boolean positionIsValid = this.positionIsValid(point);
+
+        if (!positionIsValid) {
             return false;
         }
 
@@ -224,15 +285,14 @@ public class GamePanel extends JPanel {
             int x = gridX * Const.TILE_SIZE;
             int y = gridY * Const.TILE_SIZE;
 
-            int centerX = x - Const.TILE_SIZE / 2;
-            int centerY = y - Const.TILE_SIZE / 2;
+            int topLeftX = x - Const.TILE_SIZE / 2;
+            int topLeftY = y - Const.TILE_SIZE / 2;
 
-            Rectangle bulletHitbox = new Rectangle(centerX, centerY, Const.TILE_SIZE, Const.TILE_SIZE);
+            Rectangle bulletHitbox = new Rectangle(topLeftX, topLeftY, Bullet.SIZE, Bullet.SIZE);
 
             this.bullets.add(new Bullet(bulletHitbox, x, y, shoot.getAngle()));
         }
 
-		// TODO: should return the position of the player after the move
 		return new ImmutablePoint(position);
     }
 
@@ -293,7 +353,6 @@ public class GamePanel extends JPanel {
         @Override
         public void run() {
             this.ticks++;
-
 
             if (this.ticks % Const.TICKS_PER_UPDATE == 0) {
                 runUpdate();

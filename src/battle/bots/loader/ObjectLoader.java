@@ -1,6 +1,6 @@
 package battle.bots.loader;
 
-import battle.bots.game.Bot;
+import battle.bots.game.objects.Bot;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;

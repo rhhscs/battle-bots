@@ -10,13 +10,19 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 
 public class Bullet extends PositionedGameObject {
-    private static final double BULLET_SPEED = 50.0 * 1000.0 / Const.MS_PER_UPDATE;
+    public static final int SIZE = Const.TILE_SIZE;
+
+    private static final double BULLET_SPEED = 3.0 / Const.S_PER_BULLET_MOVE;
     private final Vector velocity;
 
-    public Bullet(Rectangle hitbox, int x, int y, Angle angle) {
+    public Bullet(Rectangle hitbox, double x, double y, Angle angle) {
         super(hitbox, x, y);
 
         this.velocity = new Vector(BULLET_SPEED, angle);
+    }
+
+    public Vector getVelocity() {
+        return this.velocity;
     }
 
     /**
@@ -25,8 +31,10 @@ public class Bullet extends PositionedGameObject {
      *
      */
     public void update() {
-        this.setX((int) (this.getX() + this.velocity.getX()));
-        this.setY((int) (this.getY() + this.velocity.getY()));
+        this.setX(this.getX() + this.velocity.getX());
+        this.setY(this.getY() + this.velocity.getY());
+
+
     }
 
     /**
@@ -37,7 +45,7 @@ public class Bullet extends PositionedGameObject {
     public void draw(Graphics g) {
         // TODO
         g.setColor(Color.BLACK);
-        g.fillOval(this.getX(), this.getY(), Const.TILE_SIZE, Const.TILE_SIZE);
+        g.fillOval((int) this.getX(), (int) this.getY(), SIZE, SIZE);
     }
 
     /**

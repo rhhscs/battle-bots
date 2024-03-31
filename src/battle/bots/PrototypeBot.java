@@ -1,4 +1,4 @@
-import battle.bots.game.Bot;
+import battle.bots.game.objects.Bot;
 import battle.bots.game.GameMap;
 import battle.bots.game.actions.Action;
 import battle.bots.game.actions.Move;

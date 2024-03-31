@@ -1,4 +1,8 @@
-package battle.bots.game;
+package battle.bots.game.camera;
+
+import battle.bots.game.Const;
+import battle.bots.game.GameObject;
+import battle.bots.game.objects.Bot;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -31,7 +35,7 @@ public class Camera {
         this.tracking = bot;
     }
 
-    void setScale(GameObject[][] map, Dimension windowSize, Mode mode) {
+    public void setScale(GameObject[][] map, Dimension windowSize, Mode mode) {
         if (this.tracking == null) {
             float scaleX = (float) (windowSize.getWidth() / (map[0].length * Const.TILE_SIZE)) * FILL_AMOUNT;
             float scaleY = (float) (windowSize.getHeight() / (map.length * Const.TILE_SIZE))* FILL_AMOUNT;
@@ -47,7 +51,7 @@ public class Camera {
         }
     }
 
-    void setScale(float s) {
+    public void setScale(float s) {
         scale = s;
     }
 

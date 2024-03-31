@@ -53,6 +53,20 @@ public class Vector {
         }
     }
 
+    public Vector reflectX() {
+        return new Vector(
+            -this.x,
+            this.y
+        );
+    }
+
+    public Vector reflectY() {
+        return new Vector(
+                this.x,
+                -this.y
+        );
+    }
+
     public Vector scale(double factor) {
         return new Vector(
             this.x * factor,

@@ -1,7 +1,9 @@
-package battle.bots.game;
+package battle.bots.game.objects;
 
+import battle.bots.game.Const;
+import battle.bots.game.GameMap;
+import battle.bots.game.GameObject;
 import battle.bots.game.actions.Action;
-import battle.bots.game.objects.UnpositionedGameObject;
 
 import java.awt.Color;
 import java.awt.Graphics;
