@@ -130,6 +130,7 @@ public class GamePanel extends JPanel {
         }
 
         this.checkCollisions();
+        this.updateMap();
     }
 
     public void updateBots() {
@@ -217,13 +218,23 @@ public class GamePanel extends JPanel {
                     if (gameObject instanceof Obstacle) {
                         Obstacle obstacle = (Obstacle) gameObject;
 
-                        obstacle.collide(bullet);
+                        obstacle.bounce(bullet);
+                    } else if (gameObject instanceof Bot) {
+                        Bot bot = (Bot) gameObject;
+
+                        if (bot.getHitbox().intersects(bullet.getHitbox())) {
+                            if (bot.getHealth() > 0) {
+                                bot.setHealth(bot.getHealth() - 1); // TODO: dynamic damage?
+                                bot.startHurtAnimation();
+                            }
+                        }
                     }
                 }
             }
 
             Vector velocity = bullet.getVelocity();
 
+            // Wall Bouncing
             if (bullet.getX() - Bullet.RADIUS < 0) {
                 velocity.setX(Math.abs(velocity.getX()));
             }
@@ -238,6 +249,26 @@ public class GamePanel extends JPanel {
 
             if (bullet.getY() + Bullet.RADIUS > Const.TILE_SIZE * this.map.length) {
                 velocity.setY(-Math.abs(velocity.getY()));
+            }
+        }
+    }
+
+    public void updateMap() {
+        for (int y = 0; y < this.map.length; y++) {
+            for (int x = 0; x < this.map[y].length; x++) {
+                GameObject currentObj = this.map[y][x];
+
+                if (currentObj == null) {
+                    continue;
+                }
+
+                if (currentObj instanceof Bot) {
+                    Bot bot = (Bot) currentObj;
+
+                    if (bot.getHealth() <= 0) {
+                        this.map[y][x] = null;
+                    }
+                }
             }
         }
     }
@@ -264,7 +295,7 @@ public class GamePanel extends JPanel {
     }
 
     public ImmutablePoint handlePlayer(Bot bot, GameMap gameMap) {
-        Action action = bot.update(gameMap);
+        Action action = bot.nextAction(gameMap);
         Point position = gameMap.getPosition();
 
         if (action == null) {
@@ -274,7 +305,6 @@ public class GamePanel extends JPanel {
         if (action instanceof Move) {
             Move move = (Move) action;
 
-            // TODO
             switch (move.getDirection()) {
                 case NORTH: {
                     return new ImmutablePoint(position.x, position.y - 1);

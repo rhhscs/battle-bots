@@ -8,14 +8,20 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.sql.Time;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public abstract class Bot extends UnpositionedGameObject {
+    private static final int DAMAGE_ANIMATION_LENGTH = Const.MS_PER_TICK * 2;
     private static final int DEFAULT_HEALTH = 10;
     private static final int DEFAULT_RANGE = 1;
 
     public static final int MIN_HEALTH = 0;
     public static final int MIN_RANGE = 1;
 
+    private Timer damageAnimationTimer;
+    private SpriteState spriteState;
     private int currentSprite;
     private Image[] sprites;
 
@@ -30,6 +36,8 @@ public abstract class Bot extends UnpositionedGameObject {
         this.health = DEFAULT_HEALTH;
         this.range = DEFAULT_RANGE;
         this.color = new Color((float) Math.random(), (float)Math.random(), (float)Math.random());
+        this.spriteState = SpriteState.NORMAL;
+        this.damageAnimationTimer = new Timer();
     }
 
     /**
@@ -71,6 +79,21 @@ public abstract class Bot extends UnpositionedGameObject {
         this.range = range;
     }
 
+    synchronized void setSpriteState(SpriteState spriteState) {
+        this.spriteState = spriteState;
+    }
+
+    void startHurtAnimation() {
+        if (this.spriteState == SpriteState.HURT) {
+            this.damageAnimationTimer.purge();
+        }
+
+        this.spriteState = SpriteState.HURT;
+
+        DamageAnimationTimerTask task = new DamageAnimationTimerTask();
+        this.damageAnimationTimer.schedule(task, DAMAGE_ANIMATION_LENGTH);
+    }
+
     /**
      * Gets the name of the player.
      * @return the name
@@ -97,6 +120,16 @@ public abstract class Bot extends UnpositionedGameObject {
 
     /**
      * Called by the game to update the state of the player.
+     * Wraps a call to {@link #update(GameMap)} and provides additionally game-related functionality
+     * @param gameMap a {@link GameMap} object which provides map-related functionality
+     * @return an {@link Action} representing the action of the player
+     */
+    public Action nextAction(GameMap gameMap) {
+        return this.update(gameMap);
+    }
+
+    /**
+     * Updates the state of the player.
      * @param gameMap a {@link GameMap} object which provides map-related functionality
      * @return an {@link Action} representing the action of the player
      */
@@ -110,7 +143,12 @@ public abstract class Bot extends UnpositionedGameObject {
      */
     @Override
     public void draw(Graphics g, int x, int y) {
-        g.setColor(this.color);
+        if (this.spriteState == SpriteState.NORMAL) {
+            g.setColor(this.color);
+        } else if (this.spriteState == SpriteState.HURT) {
+            g.setColor(Color.RED);
+        }
+
         g.fillRect(x, y, Const.TILE_SIZE, Const.TILE_SIZE);
 //        Image sprite = this.sprites[this.currentSprite];
 //        g.drawImage(sprite, x, y, null);
@@ -122,5 +160,17 @@ public abstract class Bot extends UnpositionedGameObject {
     @Override
     public void tick() {
 //        this.currentSprite = (this.currentSprite + 1) % this.sprites.length;
+    }
+
+    public enum SpriteState {
+        NORMAL,
+        HURT,
+    }
+
+    private class DamageAnimationTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            setSpriteState(SpriteState.NORMAL);
+        }
     }
 }

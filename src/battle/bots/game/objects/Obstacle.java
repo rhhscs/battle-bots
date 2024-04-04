@@ -12,7 +12,7 @@ public class Obstacle extends UnpositionedGameObject {
         super(hitbox);
     }
 
-    public void collide(Bullet bullet) {
+    public void bounce(Bullet bullet) {
         Rectangle bulletHitbox = bullet.getHitbox();
 
         if (bulletHitbox.intersects(this.getHitbox())) {
