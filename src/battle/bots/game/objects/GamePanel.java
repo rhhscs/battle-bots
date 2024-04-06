@@ -271,6 +271,8 @@ public class GamePanel extends JPanel {
                 }
             }
         }
+
+        this.bullets.removeIf(curr -> curr.getState() == Bullet.State.DEAD);
     }
 
     public boolean positionIsValid(ImmutablePoint point) {

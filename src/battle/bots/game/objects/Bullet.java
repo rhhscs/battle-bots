@@ -7,18 +7,31 @@ import battle.bots.game.util.Vector;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Bullet extends PositionedGameObject {
+    public static final int DEFAULT_LIFESPAN = Const.MS_PER_BULLET_MOVE * 50;
     public static final int SIZE = Const.TILE_SIZE / 2;
     public static final double RADIUS = SIZE / 2.0;
 
     private static final double BULLET_SPEED = 300.0 * Const.S_PER_BULLET_MOVE;
     private final Vector velocity;
 
+    private State state;
+
     public Bullet(Rectangle hitbox, double x, double y, Angle angle) {
         super(hitbox, x, y);
 
         this.velocity = new Vector(BULLET_SPEED, angle);
+
+        this.state = State.ALIVE;
+        Timer timer = new Timer();
+        timer.schedule(new BulletLifespanTimerTask(), DEFAULT_LIFESPAN);
+    }
+
+    public State getState() {
+        return this.state;
     }
 
     public Vector getVelocity() {
@@ -58,5 +71,20 @@ public class Bullet extends PositionedGameObject {
     @Override
     public void tick() {
 
+    }
+
+    public enum State {
+        ALIVE,
+        DEAD,
+    }
+
+    private class BulletLifespanTimerTask extends TimerTask {
+        /**
+         * The action to be performed by this timer task.
+         */
+        @Override
+        public void run() {
+            state = State.DEAD;
+        }
     }
 }

@@ -56,8 +56,8 @@ public class GameMap {
     }
     private void constructPathfindSingle(Point tile) {
         Map<Point, Move> res = new HashMap<>();
-        Queue<Point> q = new LinkedList<Point>();
-        HashSet<Point> visited = new HashSet<Point>();
+        Queue<Point> q = new LinkedList<>();
+        HashSet<Point> visited = new HashSet<>();
         q.add(tile);
         while (!q.isEmpty()) {
             Point curr = q.remove();
