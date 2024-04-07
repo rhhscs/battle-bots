@@ -9,21 +9,27 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Stack;
 
 public class Bullet extends PositionedGameObject {
-    public static final int DEFAULT_LIFESPAN = Const.MS_PER_BULLET_MOVE * 50;
+    public static final int DEFAULT_LIFESPAN = Const.MS_PER_BULLET_MOVE * 100;
     public static final int SIZE = Const.TILE_SIZE / 2;
     public static final double RADIUS = SIZE / 2.0;
+    public static final int DEFAULT_MAX_BOUNCES = 2;
 
     private static final double BULLET_SPEED = 300.0 * Const.S_PER_BULLET_MOVE;
     private final Vector velocity;
 
     private State state;
+    private GameObject lastBouncedObject;
+    private int numBounces;
 
     public Bullet(Rectangle hitbox, double x, double y, Angle angle) {
         super(hitbox, x, y);
 
         this.velocity = new Vector(BULLET_SPEED, angle);
+        this.lastBouncedObject = null;
+        this.numBounces = 0;
 
         this.state = State.ALIVE;
         Timer timer = new Timer();
@@ -52,6 +58,35 @@ public class Bullet extends PositionedGameObject {
 
         this.getHitbox().x = topLeftX;
         this.getHitbox().y = topLeftY;
+    }
+
+    /**
+     * Increments this bullet's total bounce counter if it hits a new object. Marks it for removal if exceeds maximum number of bounces.
+     * @param gameObject The object the bullet is bouncing off of.
+     */
+    public void markBounce(GameObject gameObject) {
+        if (gameObject == null || gameObject.equals(this.lastBouncedObject)) {
+            return;
+        }
+
+        this.numBounces++;
+        this.lastBouncedObject = gameObject;
+
+        if (this.numBounces > DEFAULT_MAX_BOUNCES) {
+            this.state = State.DEAD;
+        }
+    }
+
+    /**
+     * Increments this bullet's total bounce counter, marking it for removal if it exceeds the maximum number of bounces.
+     */
+    public void markBounce() {
+        this.numBounces++;
+        this.lastBouncedObject = null;
+
+        if (this.numBounces > DEFAULT_MAX_BOUNCES) {
+            this.state = State.DEAD;
+        }
     }
 
     /**

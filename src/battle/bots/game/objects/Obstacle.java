@@ -13,6 +13,7 @@ public class Obstacle extends UnpositionedGameObject {
     }
 
     public void bounce(Bullet bullet) {
+        bullet.markBounce(this);
         Rectangle bulletHitbox = bullet.getHitbox();
 
         if (bulletHitbox.intersects(this.getHitbox())) {
@@ -21,6 +22,7 @@ public class Obstacle extends UnpositionedGameObject {
 
             int centerX = intersection.x + intersection.width / 2;
             int centerY = intersection.y + intersection.height / 2;
+
 
             if (bullet.getX() < centerX) {
                 velocity.setX(-Math.abs(velocity.getX()));

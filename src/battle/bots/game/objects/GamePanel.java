@@ -60,11 +60,9 @@ public class GamePanel extends JPanel {
         this.currentCycle = 1;
 
         // TODO remove
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 10; i++) {
             int x = (int) (Math.random() * gridWidth);
             int y = (int) (Math.random() * gridHeight);
-
-            x = y = 3;
 
             this.map[y][x] = new Obstacle(new Rectangle(x * Const.TILE_SIZE, y * Const.TILE_SIZE, Const.TILE_SIZE, Const.TILE_SIZE));
         }
@@ -74,7 +72,7 @@ public class GamePanel extends JPanel {
             int x = (int) (Math.random() * gridWidth);
             int y = (int) (Math.random() * gridHeight);
 
-            x = y = 1;
+            x = y = 10;
 
             this.map[y][x] = bot;
 
@@ -236,18 +234,22 @@ public class GamePanel extends JPanel {
 
             // Wall Bouncing
             if (bullet.getX() - Bullet.RADIUS < 0) {
+                bullet.markBounce();
                 velocity.setX(Math.abs(velocity.getX()));
             }
 
             if (bullet.getX() + Bullet.RADIUS > Const.TILE_SIZE * this.map[0].length) {
+                bullet.markBounce();
                 velocity.setX(-Math.abs(velocity.getX()));
             }
 
             if (bullet.getY() - Bullet.RADIUS < 0) {
+                bullet.markBounce();
                 velocity.setY(Math.abs(velocity.getY()));
             }
 
             if (bullet.getY() + Bullet.RADIUS > Const.TILE_SIZE * this.map.length) {
+                bullet.markBounce();
                 velocity.setY(-Math.abs(velocity.getY()));
             }
         }
