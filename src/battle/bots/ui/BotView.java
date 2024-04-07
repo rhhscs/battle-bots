@@ -85,6 +85,7 @@ public class BotView extends JPanel {
         public void actionPerformed(ActionEvent e) {
             // Open file chooser
             JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
             fileChooser.setFileFilter(new JavaFileFilter());
             fileChooser.setMultiSelectionEnabled(true);
 
