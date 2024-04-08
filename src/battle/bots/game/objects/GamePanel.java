@@ -20,6 +20,7 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -195,7 +196,10 @@ public class GamePanel extends JPanel {
     }
 
     public void checkCollisions() {
-        for (Bullet bullet : this.bullets) {
+        Iterator<Bullet> bulletIterator = this.bullets.iterator();
+        while (bulletIterator.hasNext()) {
+            Bullet bullet = bulletIterator.next();
+
             double bulletX = bullet.getX();
             double bulletY = bullet.getY();
 
@@ -224,6 +228,7 @@ public class GamePanel extends JPanel {
                             if (bot.getHealth() > 0) {
                                 bot.setHealth(bot.getHealth() - 1); // TODO: dynamic damage?
                                 bot.startHurtAnimation();
+                                bulletIterator.remove();
                             }
                         }
                     }
@@ -338,9 +343,22 @@ public class GamePanel extends JPanel {
             int centerX = (int) (x + Bullet.RADIUS);
             int centerY = (int) (y + Bullet.RADIUS);
 
-            Rectangle bulletHitbox = new Rectangle(x, y, Bullet.SIZE, Bullet.SIZE);
+            Vector bulletVelocity = new Vector(Bullet.BULLET_SPEED, shoot.getAngle());
+            double distance = Const.TILE_SIZE / 2.0 + Bullet.RADIUS;
 
-            this.bullets.add(new Bullet(bulletHitbox, centerX, centerY, shoot.getAngle()));
+            if (Math.abs(bulletVelocity.getX()) >= Math.abs(bulletVelocity.getY())) {
+                bulletVelocity.scale(distance / Math.abs(bulletVelocity.getX()));
+            } else {
+                bulletVelocity.scale(distance / Math.abs(bulletVelocity.getY()));
+            }
+
+
+            int translateX = (int) bulletVelocity.getX();
+            int translateY = (int) bulletVelocity.getY();
+
+            Rectangle bulletHitbox = new Rectangle(x + translateX, y + translateY, Bullet.SIZE, Bullet.SIZE);
+
+            this.bullets.add(new Bullet(bulletHitbox, centerX + translateX, centerY + translateY, shoot.getAngle()));
         }
 
 		return new ImmutablePoint(position);

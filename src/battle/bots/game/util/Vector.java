@@ -57,6 +57,16 @@ public class Vector {
         return Math.hypot(this.x, this.y);
     }
 
+    public Vector increaseMagnitude(int x) {
+        double magnitude = this.getMagnitude() + x;
+        Angle angle = this.getAngle();
+
+        this.x = magnitude * Math.cos(angle.asRadians());
+        this.y = magnitude * Math.sin(angle.asRadians());
+
+        return this;
+    }
+
     public Angle getAngle() {
         if (this.y > 0) {
             return new Angle(Math.atan2(this.y, this.x), Angle.Unit.RADIAN);

@@ -9,15 +9,14 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Stack;
 
 public class Bullet extends PositionedGameObject {
     public static final int DEFAULT_LIFESPAN = Const.MS_PER_BULLET_MOVE * 100;
     public static final int SIZE = Const.TILE_SIZE / 2;
     public static final double RADIUS = SIZE / 2.0;
     public static final int DEFAULT_MAX_BOUNCES = 2;
+    public static final double BULLET_SPEED = 300.0 * Const.S_PER_BULLET_MOVE;
 
-    private static final double BULLET_SPEED = 300.0 * Const.S_PER_BULLET_MOVE;
     private final Vector velocity;
 
     private State state;

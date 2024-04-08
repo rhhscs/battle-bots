@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.sql.Time;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,7 +19,7 @@ public abstract class Bot extends UnpositionedGameObject {
     public static final int MIN_HEALTH = 0;
     public static final int MIN_RANGE = 1;
 
-    private Timer damageAnimationTimer;
+    private final Timer damageAnimationTimer;
     private SpriteState spriteState;
     private int currentSprite;
     private Image[] sprites;
