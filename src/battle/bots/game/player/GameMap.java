@@ -1,4 +1,4 @@
-package battle.bots.game;
+package battle.bots.game.player;
 
 
 import battle.bots.game.actions.Move;

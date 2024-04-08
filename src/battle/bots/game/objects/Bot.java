@@ -1,7 +1,7 @@
 package battle.bots.game.objects;
 
 import battle.bots.game.Const;
-import battle.bots.game.GameMap;
+import battle.bots.game.player.GameMap;
 import battle.bots.game.actions.Action;
 
 import java.awt.Color;
@@ -14,10 +14,10 @@ import java.util.TimerTask;
 public abstract class Bot extends UnpositionedGameObject {
     private static final int DAMAGE_ANIMATION_LENGTH = Const.MS_PER_TICK * 2;
     private static final int DEFAULT_HEALTH = 10;
-    private static final int DEFAULT_RANGE = 1;
+    private static final int DEFAULT_GAS = 10;
 
     public static final int MIN_HEALTH = 0;
-    public static final int MIN_RANGE = 1;
+    public static final int MIN_GAS = 0;
 
     private final Timer damageAnimationTimer;
     private SpriteState spriteState;
@@ -26,14 +26,13 @@ public abstract class Bot extends UnpositionedGameObject {
 
     private String name;
     private int health;
-    private int range;
+    private int gas;
 
     private final Color color;
 
     public Bot() {
         super(new Rectangle(0, 0, Const.TILE_SIZE, Const.TILE_SIZE));
         this.health = DEFAULT_HEALTH;
-        this.range = DEFAULT_RANGE;
         this.color = new Color((float) Math.random(), (float)Math.random(), (float)Math.random());
         this.spriteState = SpriteState.NORMAL;
         this.damageAnimationTimer = new Timer();
@@ -66,16 +65,16 @@ public abstract class Bot extends UnpositionedGameObject {
     }
 
     /**
-     * Sets the range of the player.
-     * @param range the new range of the player
-     * @throws IllegalArgumentException if {@code range} is below {@link Bot#MIN_RANGE}
+     * Sets the gas of the player.
+     * @param gas the new health of the player
+     * @throws IllegalArgumentException if {@code health} is below {@link Bot#MIN_HEALTH}
      */
-    void setRange(int range) {
-        if (range < MIN_RANGE) {
-            throw new IllegalArgumentException("Parameter `range` (" + range + ") cannot be below the minimum range (" + MIN_RANGE + ").");
+    void setGas(int gas) {
+        if (gas < MIN_GAS) {
+            throw new IllegalArgumentException("Parameter `health` (" + gas + ") cannot be below the minimum health (" + MIN_GAS + ").");
         }
 
-        this.range = range;
+        this.gas = gas;
     }
 
     synchronized void setSpriteState(SpriteState spriteState) {
@@ -110,11 +109,11 @@ public abstract class Bot extends UnpositionedGameObject {
     }
 
     /**
-     * Gets the range of the player.
-     * @return the range
+     * Gets the gas of the player.
+     * @return the gas
      */
-    public int getRange() {
-        return this.range;
+    public int getGas() {
+        return this.gas;
     }
 
     /**

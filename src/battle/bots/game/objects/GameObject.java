@@ -1,5 +1,6 @@
 package battle.bots.game.objects;
 
+import java.awt.Graphics;
 import java.awt.Rectangle;
 
 /**

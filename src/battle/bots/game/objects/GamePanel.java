@@ -1,7 +1,7 @@
 package battle.bots.game.objects;
 
 import battle.bots.game.Const;
-import battle.bots.game.GameMap;
+import battle.bots.game.player.GameMap;
 import battle.bots.game.actions.Action;
 import battle.bots.game.actions.Move;
 import battle.bots.game.actions.Shoot;
@@ -68,12 +68,18 @@ public class GamePanel extends JPanel {
             this.map[y][x] = new Obstacle(new Rectangle(x * Const.TILE_SIZE, y * Const.TILE_SIZE, Const.TILE_SIZE, Const.TILE_SIZE));
         }
 
+        for (int i = 0; i < 10; i++) {
+            int x = (int) (Math.random() * gridWidth);
+            int y = (int) (Math.random() * gridHeight);
+            int gas = (int) (Math.random() * 10) + 1;
+
+            this.map[y][x] = new Gas(new Rectangle(x * Const.TILE_SIZE, y * Const.TILE_SIZE, Const.TILE_SIZE, Const.TILE_SIZE), gas);
+        }
+
         for (Bot bot : bots) {
             // TODO: make position generation random
             int x = (int) (Math.random() * gridWidth);
             int y = (int) (Math.random() * gridHeight);
-
-            x = y = 10;
 
             this.map[y][x] = bot;
 
@@ -179,6 +185,14 @@ public class GamePanel extends JPanel {
 
             ImmutablePoint prevPosition = botInfo.getSecond();
             Bot bot = botInfo.getFirst();
+
+            UnpositionedGameObject currentObject = this.map[position.getY()][position.getX()];
+
+            if (currentObject instanceof Gas) {
+                Gas gas = (Gas) currentObject;
+
+                bot.setGas(bot.getGas() + gas.getGas());
+            }
 
             this.map[prevPosition.getY()][prevPosition.getX()] = null;
             this.map[position.getY()][position.getX()] = bot;
