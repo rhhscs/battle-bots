@@ -328,6 +328,12 @@ public class GamePanel extends JPanel {
         if (action instanceof Move) {
             Move move = (Move) action;
 
+            if (bot.getGas() > 0) {
+                bot.setGas(bot.getGas() - 1);
+            } else if ((bot.getGas() == 0) && (Math.random() <= Const.OUT_OF_FUEL_PENALTY)) {
+                return new ImmutablePoint(position);
+            }
+
             switch (move.getDirection()) {
                 case NORTH: {
                     return new ImmutablePoint(position.x, position.y - 1);
@@ -373,6 +379,10 @@ public class GamePanel extends JPanel {
             Rectangle bulletHitbox = new Rectangle(x + translateX, y + translateY, Bullet.SIZE, Bullet.SIZE);
 
             this.bullets.add(new Bullet(bulletHitbox, centerX + translateX, centerY + translateY, shoot.getAngle()));
+        }
+
+        if ((bot.getGas() > 0) && (Math.random() <= Const.IDLING_PENALTY)) {
+            bot.setGas(bot.getGas() - 1);
         }
 
 		return new ImmutablePoint(position);

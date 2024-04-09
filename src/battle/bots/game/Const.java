@@ -22,4 +22,11 @@ public class Const {
     public static final double TILE_ASPECT_RATIO = SQRT_2; // > 1 for landscape
     public static final int MAX_HEIGHT = 50;
     public static final int MIN_HEIGHT = 25;
+
+    /** Game behaviour constants */
+    // Approximate percentage of moves lost when a player is out of fuel
+    public static final double OUT_OF_FUEL_PENALTY = 0.5;
+
+    // Approximate percentage of fuel post when spent idling
+    public static final double IDLING_PENALTY = 0.5;
 }
