@@ -1,4 +1,18 @@
 package battle.bots.game.player.info;
 
-public class GasInfo {
+import battle.bots.game.objects.Gas;
+import battle.bots.game.player.Coordinate;
+
+public class GasInfo extends Info {
+    private final Gas gas;
+    
+    public GasInfo(Coordinate coordinate, Gas gas) {
+        super(coordinate);
+
+        this.gas = gas;
+    }
+
+    public int getGas() {
+        return this.gas.getGas();
+    }
 }

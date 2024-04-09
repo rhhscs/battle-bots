@@ -3,13 +3,12 @@ package battle.bots.game.player.info;
 import battle.bots.game.objects.Bot;
 import battle.bots.game.player.Coordinate;
 
-public class BotInfo {
+public class BotInfo extends Info {
     private final Bot bot;
-    private final Coordinate coordinate;
 
-    public BotInfo(Bot bot, Coordinate coordinate) {
+    public BotInfo(Coordinate coordinate, Bot bot) {
+        super(coordinate);
         this.bot = bot;
-        this.coordinate = coordinate;
     }
 
     public int getBotHealth() {
@@ -18,9 +17,5 @@ public class BotInfo {
 
     public int getBotGas() {
         return this.bot.getGas();
-    }
-
-    public Coordinate getCoordinate() {
-        return this.coordinate;
     }
 }

@@ -35,11 +35,6 @@ public class Coordinate {
         );
     }
 
-    public enum Type {
-        NORMAL,
-        GRID,
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -57,5 +52,10 @@ public class Coordinate {
     @Override
     public int hashCode() {
         return Objects.hash(this.point);
+    }
+
+    public enum Type {
+        NORMAL,
+        GRID,
     }
 }
