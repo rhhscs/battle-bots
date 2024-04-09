@@ -27,16 +27,23 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * A Java Swing Component responsible for executing and rendering the game.
+ * @author Harry Xu
+ * @version 1.0 - March 23rd 2024
+ */
 public class GamePanel extends JPanel {
     private final UnpositionedGameObject[][] map;
     private final Set<Bullet> bullets;
 
     private final Timer gameLoop;
-
     private int currentCycle;
-
     private final Camera camera;
 
+    /**
+     * Constructs a {@link GamePanel} with a list of {@link Bot}s participating in the game.
+     * @param bots the list of bots
+     */
     public GamePanel(List<Bot> bots) {
         this.camera = new Camera();
 
@@ -163,6 +170,7 @@ public class GamePanel extends JPanel {
             }
         }
 
+        // Moves the player
         for (Map.Entry<ImmutablePoint, List<Pair<Bot, ImmutablePoint>>> entry : moveRegistry.entrySet()) {
             ImmutablePoint position = entry.getKey();
 
@@ -188,6 +196,7 @@ public class GamePanel extends JPanel {
 
             UnpositionedGameObject currentObject = this.map[position.getY()][position.getX()];
 
+            // Gas collection
             if (currentObject instanceof Gas) {
                 Gas gas = (Gas) currentObject;
 
@@ -203,14 +212,21 @@ public class GamePanel extends JPanel {
         }
     }
 
+    /**
+     * Updates the state of all the bullets within the game.
+     */
     public void updateBullets() {
         for (Bullet bullet : this.bullets) {
             bullet.update();
         }
     }
 
+    /**
+     * Checks for collisions between bullets and other {@link PositionedGameObject}s.
+     */
     public void checkCollisions() {
         Iterator<Bullet> bulletIterator = this.bullets.iterator();
+
         while (bulletIterator.hasNext()) {
             Bullet bullet = bulletIterator.next();
 

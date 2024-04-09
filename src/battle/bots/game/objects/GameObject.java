@@ -11,6 +11,10 @@ import java.awt.Rectangle;
 public abstract class GameObject {
     private final Rectangle hitbox;
 
+    /**
+     * Constructs a {@link GameObject} with a rectangular hitbox.
+     * @param hitbox the hitbox of the game object
+     */
     protected GameObject(Rectangle hitbox) {
         this.hitbox = hitbox;
     }
