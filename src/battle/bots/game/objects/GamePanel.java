@@ -114,7 +114,7 @@ public class GamePanel extends JPanel {
      * An animation frame is NOT the same as an update cycle.
      * Animation frames occur more often to create a smoother animation.
      */
-    public void runTick() {
+    private void runTick() {
         for (GameObject[] gameObjects : this.map) {
             for (GameObject currentObject : gameObjects) {
                 if (currentObject != null) {
@@ -130,7 +130,7 @@ public class GamePanel extends JPanel {
      * runUpdate
      * Runs an update cycle on the map
      */
-    public void runUpdate() {
+    private void runUpdate() {
         this.currentCycle++;
 
         if (this.currentCycle % Const.UPDATES_PER_MOVE == 0) {
@@ -145,7 +145,10 @@ public class GamePanel extends JPanel {
         this.updateMap();
     }
 
-    public void updateBots() {
+    /**
+     * Updates the state and position of the bots.
+     */
+    private void updateBots() {
         Map<ImmutablePoint, List<Pair<Bot, ImmutablePoint>>> moveRegistry = new HashMap<>();
 
         for (int y = 0; y < this.map.length; y++) {
@@ -182,11 +185,21 @@ public class GamePanel extends JPanel {
 
             // Get random player
             List<Pair<Bot, ImmutablePoint>> bots = entry.getValue();
-            Pair<Bot, ImmutablePoint> botInfo;
+            Pair<Bot, ImmutablePoint> botInfo = null;
 
             if (bots.size() > 1) {
-                int index = (int) (Math.random() * bots.size());
-                botInfo = bots.get(index);
+                // If a player has not moved, then they retain priority over the spot
+                for (Pair<Bot, ImmutablePoint> bot : bots) {
+                    if (bot.getSecond().equals(position)) {
+                        botInfo = bot;
+                        break;
+                    }
+                }
+
+                if (botInfo == null) {
+                    int index = (int) (Math.random() * bots.size());
+                    botInfo = bots.get(index);
+                }
             } else {
                 botInfo = bots.get(0);
             }
@@ -215,7 +228,7 @@ public class GamePanel extends JPanel {
     /**
      * Updates the state of all the bullets within the game.
      */
-    public void updateBullets() {
+    private void updateBullets() {
         for (Bullet bullet : this.bullets) {
             bullet.update();
         }
@@ -224,7 +237,7 @@ public class GamePanel extends JPanel {
     /**
      * Checks for collisions between bullets and other {@link PositionedGameObject}s.
      */
-    public void checkCollisions() {
+    private void checkCollisions() {
         Iterator<Bullet> bulletIterator = this.bullets.iterator();
 
         while (bulletIterator.hasNext()) {
@@ -290,7 +303,10 @@ public class GamePanel extends JPanel {
         }
     }
 
-    public void updateMap() {
+    /**
+     * Checks the state of all game objects and removes any needed.
+     */
+    private void updateMap() {
         for (int y = 0; y < this.map.length; y++) {
             for (int x = 0; x < this.map[y].length; x++) {
                 GameObject currentObj = this.map[y][x];
@@ -312,7 +328,13 @@ public class GamePanel extends JPanel {
         this.bullets.removeIf(curr -> curr.getState() == Bullet.State.DEAD);
     }
 
-    public boolean positionIsValid(ImmutablePoint point) {
+    /**
+     * Checks is a position is valid (i.e. it is within bounds).
+     * @param point the point to check
+     * @return if the position is valid
+     * @throws NullPointerException if the {@code point} parameter is null
+     */
+    private boolean positionIsValid(ImmutablePoint point) {
         if (point == null) {
             throw new NullPointerException("Parameter `point` cannot be null.");
         }
@@ -323,7 +345,13 @@ public class GamePanel extends JPanel {
                 point.getX() < this.map[point.getY()].length;
     }
 
-    public boolean positionIsVacant(ImmutablePoint point) {
+    /**
+     * Checks is a position is valid (i.e. it is within bounds) and vacant ().
+     * @param point the point to check
+     * @return if the position is valid
+     * @throws NullPointerException if the {@code point} parameter is null
+     */
+    private boolean positionIsVacant(ImmutablePoint point) {
         boolean positionIsValid = this.positionIsValid(point);
 
         if (!positionIsValid) {
@@ -333,7 +361,12 @@ public class GamePanel extends JPanel {
         return !(this.map[point.getY()][point.getX()] instanceof Obstacle);
     }
 
-    public ImmutablePoint handlePlayer(Bot bot, GameMap gameMap) {
+    /**
+     * Handles the {@link Action} returned by the {@link Bot#nextAction(GameMap)} method.
+     * @param bot the bot returning the {@link Action}
+     * @param gameMap a {@link GameMap} instance which holds game map metadata
+     */
+    private ImmutablePoint handlePlayer(Bot bot, GameMap gameMap) {
         Action action = bot.nextAction(gameMap);
         Point position = gameMap.getPosition();
 
@@ -344,6 +377,7 @@ public class GamePanel extends JPanel {
         if (action instanceof Move) {
             Move move = (Move) action;
 
+            // Handling gas
             if (bot.getGas() > 0) {
                 bot.setGas(bot.getGas() - 1);
             } else if ((bot.getGas() == 0) && (Math.random() <= Const.OUT_OF_FUEL_PENALTY)) {
@@ -370,6 +404,7 @@ public class GamePanel extends JPanel {
         } else if (action instanceof Shoot) {
             Shoot shoot = (Shoot) action;
 
+            // Generates the bullets along the velocity vector, but outside the player's hitbox
             int gridX = (int) position.getX();
             int gridY = (int) position.getY();
 
@@ -388,12 +423,10 @@ public class GamePanel extends JPanel {
                 bulletVelocity.scale(distance / Math.abs(bulletVelocity.getY()));
             }
 
-
             int translateX = (int) bulletVelocity.getX();
             int translateY = (int) bulletVelocity.getY();
 
             Rectangle bulletHitbox = new Rectangle(x + translateX, y + translateY, Bullet.SIZE, Bullet.SIZE);
-
             this.bullets.add(new Bullet(bulletHitbox, centerX + translateX, centerY + translateY, shoot.getAngle()));
         }
 
