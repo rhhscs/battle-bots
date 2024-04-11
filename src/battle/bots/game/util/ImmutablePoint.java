@@ -31,6 +31,14 @@ public final class ImmutablePoint {
         return this.y;
     }
 
+    public ImmutablePoint translateX(int dx) {
+        return new ImmutablePoint(this.x + dx, this.y);
+    }
+
+    public ImmutablePoint translateY(int dy) {
+        return new ImmutablePoint(this.x, this.y + dy);
+    }
+
     public Point toAWTPoint() {
         return new Point(this.x, this.y);
     }

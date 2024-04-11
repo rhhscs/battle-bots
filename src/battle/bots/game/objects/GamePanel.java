@@ -161,14 +161,13 @@ public class GamePanel extends JPanel {
 
                 if (currentObj instanceof Bot) {
                     Bot bot = (Bot) currentObj;
-                    Point point = new Point(x, y);
-                    // TODO: consider replacing the point with an immutable point
+                    ImmutablePoint point = new ImmutablePoint(x, y);
                     GameMap gameMap = new GameMap(this.map, bot, point);
 
                     ImmutablePoint newPos = this.handlePlayer(bot, gameMap);
 
                     moveRegistry.putIfAbsent(newPos, new ArrayList<>());
-                    moveRegistry.get(newPos).add(new Pair<>(bot, new ImmutablePoint(point)));
+                    moveRegistry.get(newPos).add(new Pair<>(bot, point));
                 }
             }
         }
@@ -368,10 +367,10 @@ public class GamePanel extends JPanel {
      */
     private ImmutablePoint handlePlayer(Bot bot, GameMap gameMap) {
         Action action = bot.nextAction(gameMap);
-        Point position = gameMap.getPosition();
+        ImmutablePoint position = gameMap.getPosition();
 
         if (action == null) {
-            return new ImmutablePoint(position);
+            return position;
         }
 
         if (action instanceof Move) {
@@ -381,21 +380,21 @@ public class GamePanel extends JPanel {
             if (bot.getGas() > 0) {
                 bot.setGas(bot.getGas() - 1);
             } else if ((bot.getGas() == 0) && (Math.random() <= Const.OUT_OF_FUEL_PENALTY)) {
-                return new ImmutablePoint(position);
+                return position;
             }
 
             switch (move.getDirection()) {
                 case NORTH: {
-                    return new ImmutablePoint(position.x, position.y - 1);
+                    return position.translateY(-1);
                 }
                 case SOUTH: {
-                    return new ImmutablePoint(position.x, position.y + 1);
+                    return position.translateY(1);
                 }
                 case EAST: {
-                    return new ImmutablePoint(position.x - 1, position.y);
+                    return position.translateX(-1);
                 }
                 case WEST: {
-                    return new ImmutablePoint(position.x + 1, position.y);
+                    return position.translateX(1);
                 }
                 default: {
                     throw new IllegalStateException("Move direction must be either NORTH, SOUTH, EAST, or WEST");
@@ -405,8 +404,8 @@ public class GamePanel extends JPanel {
             Shoot shoot = (Shoot) action;
 
             // Generates the bullets along the velocity vector, but outside the player's hitbox
-            int gridX = (int) position.getX();
-            int gridY = (int) position.getY();
+            int gridX = position.getX();
+            int gridY = position.getY();
 
             int x = gridX * Const.TILE_SIZE;
             int y = gridY * Const.TILE_SIZE;
@@ -434,11 +433,11 @@ public class GamePanel extends JPanel {
             bot.setGas(bot.getGas() - 1);
         }
 
-		return new ImmutablePoint(position);
+		return position;
     }
 
     /**
-     * Paints the game using the {@link Graphics} objects
+     * Paints the game using the {@link Graphics} objects.
      * @param g the graphics object
      */
     @Override
@@ -480,17 +479,19 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Task responsible for animating (ticks) and running update cycles .
+     * Task responsible for animating (ticks) and running update cycles.
      * @author Harry Xu
      * @version 1.0 - March 23rd 2024
      */
     public class GameLoopTask extends TimerTask {
         private int ticks;
 
+        /** Constructs a {@link GameLoopTask}. */
         public GameLoopTask() {
             this.ticks = 0;
         }
 
+        /** Runs the game loop. */
         @Override
         public void run() {
             this.ticks++;
@@ -503,6 +504,11 @@ public class GamePanel extends JPanel {
         }
     }
 
+    /**
+     * Sets the camera scale to match the new window size.
+     * @author Laison Tao
+     * @version 1.0 - March 28rd 2024
+     */
     private class ResizeListener extends ComponentAdapter {
         @Override
         public void componentResized(ComponentEvent e) {

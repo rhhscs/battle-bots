@@ -5,8 +5,9 @@ import battle.bots.game.actions.Move;
 import battle.bots.game.actions.Move.Direction;
 import battle.bots.game.objects.Bot;
 import battle.bots.game.objects.GameObject;
+import battle.bots.game.player.info.Info;
+import battle.bots.game.util.ImmutablePoint;
 
-import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,77 +22,91 @@ import java.util.Queue;
  */
 public class GameMap {
     private final GameObject[][] map;
-    private final Map<Point, Map<Point, Move>> pathfindCache = new HashMap<>();
+    private final Map<ImmutablePoint, Map<ImmutablePoint, Move>> pathfindCache;
     private final Bot bot;
-    private final Point botPosition;
+    private final ImmutablePoint botPosition;
 
 
-    public GameMap(GameObject[][] map, Bot bot, Point botPosition) {
+    public GameMap(GameObject[][] map, Bot bot, ImmutablePoint botPosition) {
         this.map = map;
+        this.pathfindCache = new HashMap<>();
         this.bot = bot;
         this.botPosition = botPosition;
     }
 
-    public Point getPosition() {
+    public ImmutablePoint getPosition() {
         return this.botPosition;
     }
 
-    public Move pathfind(Point start, Point dest) {
-        if (map[start.y][start.x] == null || map[dest.y][dest.x] == null)
+    public Move pathfind(ImmutablePoint start, ImmutablePoint dest) {
+        if (this.map[start.getY()][start.getX()] == null || this.map[dest.getY()][dest.getX()] == null) {
             return null;
-        if (!pathfindCache.containsKey(start) || !pathfindCache.get(start).containsKey(dest))
+        }
+
+        if (!this.pathfindCache.containsKey(start) || !this.pathfindCache.get(start).containsKey(dest)) {
             return null;
-        return pathfindCache.get(start).get(dest);
+        }
+
+        return this.pathfindCache.get(start).get(dest);
     }
 
 
     private void constructPathfind() {
-        for (int y = 0; y <= map.length; y++){
-            for (int x = 0; x <= map[y].length; x++){
-                if (map[y][x] != null) {
-                    constructPathfindSingle(new Point(x, y));
+        for (int y = 0; y <= this.map.length; y++){
+            for (int x = 0; x <= this.map[y].length; x++){
+                if (this.map[y][x] != null) {
+                    constructPathfindSingle(new ImmutablePoint(x, y));
                 }
             }
         }
     }
-    private void constructPathfindSingle(Point tile) {
-        Map<Point, Move> res = new HashMap<>();
-        Queue<Point> q = new LinkedList<>();
-        HashSet<Point> visited = new HashSet<>();
+    private void constructPathfindSingle(ImmutablePoint tile) {
+        Map<ImmutablePoint, Move> res = new HashMap<>();
+        Queue<ImmutablePoint> q = new LinkedList<>();
+        HashSet<ImmutablePoint> visited = new HashSet<>();
         q.add(tile);
+
         while (!q.isEmpty()) {
-            Point curr = q.remove();
-            if (inBounds(curr.y - 1, curr.x) && map[curr.y - 1][curr.x] != null) {
-                Point temp = new Point(curr.x, curr.y - 1);
+            ImmutablePoint curr = q.remove();
+
+            int x = curr.getX();
+            int y = curr.getY();
+
+            if (inBounds(x, y - 1) && this.map[y - 1][x] != null) {
+                ImmutablePoint temp = new ImmutablePoint(x, y);
                 res.put(temp, new Move(Direction.NORTH));
                 q.add(temp);
             }
-            if (inBounds(curr.y + 1, curr.x) && map[curr.y + 1][curr.x] != null) {
-                Point temp = new Point(curr.x, curr.y + 1);
+
+            if (inBounds(x, y + 1) && this.map[y + 1][x] != null) {
+                ImmutablePoint temp = new ImmutablePoint(x, y + 1);
                 res.put(temp, new Move(Direction.SOUTH));
                 q.add(temp);
             }
-            if (inBounds(curr.y, curr.x - 1) && map[curr.y][curr.x - 1] != null) {
-                Point temp = new Point(curr.x - 1, curr.y);
+
+            if (inBounds(x - 1, y) && this.map[y][x - 1] != null) {
+                ImmutablePoint temp = new ImmutablePoint(x - 1, y);
                 res.put(temp, new Move(Direction.WEST));
                 q.add(temp);
             }
-            if (inBounds(curr.y, curr.x + 1) && map[curr.y][curr.x + 1] != null) {
-                Point temp = new Point(curr.x + 1, curr.y);
+
+            if (inBounds(x + 1, y) && this.map[y][x + 1] != null) {
+                ImmutablePoint temp = new ImmutablePoint(x + 1, y);
                 res.put(temp, new Move(Direction.EAST));
                 q.add(temp);
             }
 
             visited.add(curr);
         }
-        pathfindCache.put(tile, res);
+
+        this.pathfindCache.put(tile, res);
     }
     
     private boolean inBounds(int x, int y){
         return false;
     }
 
-    public List<GameObject> getObjects() {
+    public List<Info> getObjects() {
         // TODO: implement
         return null;
     }

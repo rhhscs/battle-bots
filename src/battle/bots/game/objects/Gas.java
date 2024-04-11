@@ -1,7 +1,8 @@
 package battle.bots.game.objects;
 
 import battle.bots.game.Const;
-import battle.bots.game.util.Vector;
+import battle.bots.game.actions.Action;
+import battle.bots.game.player.GameMap;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -10,10 +11,19 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
+/**
+ * Gas game object which is collected to refuel a bot
+ * @author Harry Xu
+ * @version 1.0 - April 8th 2024
+ */
 public class Gas extends UnpositionedGameObject {
-
     private final int gas;
 
+    /**
+     * Constructs a {@link Gas} object.
+     * @param hitbox the hitbox of the game object
+     * @param gas the amount of gas the object replenishes
+     */
     public Gas(Rectangle hitbox, int gas) {
         super(hitbox);
 

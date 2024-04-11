@@ -11,6 +11,13 @@ import java.awt.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * Abstract base class for all user developed bots.
+ * Contains one abstract method {@link Bot#update(GameMap)} which should be overriden.
+ * This method returns an {@link Action}, indicating the next move by the bot.
+ * @author Harry Xu
+ * @version 1.0 - March 24th 2024
+ */
 public abstract class Bot extends UnpositionedGameObject {
     private static final int DAMAGE_ANIMATION_LENGTH = Const.MS_PER_TICK * 2;
     private static final int DEFAULT_HEALTH = 10;
@@ -30,9 +37,13 @@ public abstract class Bot extends UnpositionedGameObject {
 
     private final Color color;
 
+    /**
+     * Constructs a {@link Bot}.
+     */
     public Bot() {
         super(new Rectangle(0, 0, Const.TILE_SIZE, Const.TILE_SIZE));
         this.health = DEFAULT_HEALTH;
+        this.gas = DEFAULT_GAS;
         this.color = new Color((float) Math.random(), (float)Math.random(), (float)Math.random());
         this.spriteState = SpriteState.NORMAL;
         this.damageAnimationTimer = new Timer();
@@ -77,10 +88,17 @@ public abstract class Bot extends UnpositionedGameObject {
         this.gas = gas;
     }
 
+    /**
+     * Sets the state of the bot's sprite.
+     * @param spriteState the new state of the bot
+     */
     synchronized void setSpriteState(SpriteState spriteState) {
         this.spriteState = spriteState;
     }
 
+    /**
+     * Starts the hurt animation of the bot.
+     */
     void startHurtAnimation() {
         if (this.spriteState == SpriteState.HURT) {
             this.damageAnimationTimer.purge();
@@ -153,19 +171,33 @@ public abstract class Bot extends UnpositionedGameObject {
     }
 
     /**
-     * Advances the sprite image
+     * Advances the sprite image.
      */
     @Override
     public void tick() {
-//        this.currentSprite = (this.currentSprite + 1) % this.sprites.length;
+        // TODO
+        // this.currentSprite = (this.currentSprite + 1) % this.sprites.length;
     }
 
+    /**
+     * The state of the sprite of the {@link Bot}.
+     * @author Harry Xu
+     * @version 1.0 - April 4th 2024
+     */
     public enum SpriteState {
         NORMAL,
         HURT,
     }
 
+    /**
+     * Ends the damage.
+     * @author Harry Xu
+     * @version 1.0 - April 4th 2024
+     */
     private class DamageAnimationTimerTask extends TimerTask {
+        /**
+         * Ends the damage animation by resetting the {@link Bot#spriteState} to {@link SpriteState#NORMAL}.
+         */
         @Override
         public void run() {
             setSpriteState(SpriteState.NORMAL);
