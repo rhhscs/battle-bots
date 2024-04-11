@@ -7,6 +7,7 @@ import battle.bots.game.objects.Bot;
 import battle.bots.game.objects.GameObject;
 import battle.bots.game.player.info.Info;
 import battle.bots.game.util.ImmutablePoint;
+import battle.bots.game.Const;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.Queue;
  */
 public class GameMap {
     private final GameObject[][] map;
+    //private final Move[][][][] pathfindCache;
     private final Map<ImmutablePoint, Map<ImmutablePoint, Move>> pathfindCache;
     private final Bot bot;
     private final ImmutablePoint botPosition;
@@ -30,8 +32,11 @@ public class GameMap {
     public GameMap(GameObject[][] map, Bot bot, ImmutablePoint botPosition) {
         this.map = map;
         this.pathfindCache = new HashMap<>();
+        //this.pathfindCache = new Move[map.length][map[0].length][map.length][map[0].length];
         this.bot = bot;
         this.botPosition = botPosition;
+
+        constructPathfind();
     }
 
     public ImmutablePoint getPosition() {
@@ -65,6 +70,9 @@ public class GameMap {
         Queue<ImmutablePoint> q = new LinkedList<>();
         HashSet<ImmutablePoint> visited = new HashSet<>();
         q.add(tile);
+        visited.add(tile);
+
+        Direction[] changeInDirection = {Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH};
 
         while (!q.isEmpty()) {
             ImmutablePoint curr = q.remove();
@@ -72,31 +80,19 @@ public class GameMap {
             int x = curr.getX();
             int y = curr.getY();
 
-            if (inBounds(x, y - 1) && this.map[y - 1][x] != null) {
-                ImmutablePoint temp = new ImmutablePoint(x, y);
-                res.put(temp, new Move(Direction.NORTH));
-                q.add(temp);
-            }
+            for(int i=0; i<Const.CHANGE_IN_X.length; i++) {
 
-            if (inBounds(x, y + 1) && this.map[y + 1][x] != null) {
-                ImmutablePoint temp = new ImmutablePoint(x, y + 1);
-                res.put(temp, new Move(Direction.SOUTH));
-                q.add(temp);
-            }
+                int new_x = x + Const.CHANGE_IN_X[i];
+                int new_y = y + Const.CHANGE_IN_Y[i];
+                ImmutablePoint newPoint = new ImmutablePoint(new_x, new_y);
 
-            if (inBounds(x - 1, y) && this.map[y][x - 1] != null) {
-                ImmutablePoint temp = new ImmutablePoint(x - 1, y);
-                res.put(temp, new Move(Direction.WEST));
-                q.add(temp);
-            }
+                if (inBounds(new_x, new_y) && this.map[y - 1][x] == null && !visited.contains(newPoint)) {
+                    res.put(newPoint, new Move(changeInDirection[i]));
+                    q.add(newPoint);
+                    visited.add(newPoint);
+                }
 
-            if (inBounds(x + 1, y) && this.map[y][x + 1] != null) {
-                ImmutablePoint temp = new ImmutablePoint(x + 1, y);
-                res.put(temp, new Move(Direction.EAST));
-                q.add(temp);
             }
-
-            visited.add(curr);
         }
 
         this.pathfindCache.put(tile, res);
