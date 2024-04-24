@@ -29,4 +29,11 @@ public class Shoot implements Action {
     public Angle getAngle() {
         return this.angle;
     }
+
+    @Override
+    public String toString() {
+        return "Shoot{" +
+                "angle=" + angle +
+                '}';
+    }
 }

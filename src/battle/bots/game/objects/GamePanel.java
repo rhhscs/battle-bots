@@ -13,7 +13,6 @@ import battle.bots.game.util.Vector;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -35,6 +34,8 @@ import java.util.TimerTask;
 public class GamePanel extends JPanel {
     private final UnpositionedGameObject[][] map;
     private final Set<Bullet> bullets;
+    private final List<Bot> bots;
+    private final Map<Bot, ImmutablePoint> moves;
 
     private final Timer gameLoop;
     private int currentCycle;
@@ -65,6 +66,8 @@ public class GamePanel extends JPanel {
         int gridWidth = (int)(Const.TILE_SIZE / Const.TILE_ASPECT_RATIO);
         this.map = new UnpositionedGameObject[gridHeight][gridWidth];
         this.bullets = new HashSet<>();
+        this.bots = bots;
+        this.moves = new HashMap<>();
         this.currentCycle = 1;
 
         // TODO remove
@@ -85,14 +88,15 @@ public class GamePanel extends JPanel {
 
         for (Bot bot : bots) {
             // TODO: make position generation random
-            int x = (int) (Math.random() * gridWidth);
-            int y = (int) (Math.random() * gridHeight);
-
-            this.map[y][x] = bot;
+            int x = (int) (Math.random() * gridWidth) * Const.TILE_SIZE;
+            int y = (int) (Math.random() * gridHeight) * Const.TILE_SIZE;
 
             Rectangle hitbox = bot.getHitbox().getBounds();
             hitbox.x = x;
             hitbox.y = y;
+
+            bot.setX(x);
+            bot.setY(y);
         }
 
         this.gameLoop = new Timer();
@@ -133,7 +137,7 @@ public class GamePanel extends JPanel {
     private void runUpdate() {
         this.currentCycle++;
 
-        if (this.currentCycle % Const.UPDATES_PER_MOVE == 0) {
+        if (this.currentCycle % Const.UPDATES_PER_GRID_MOVE == 0) {
             this.updateBots();
         }
 
@@ -141,35 +145,64 @@ public class GamePanel extends JPanel {
             this.updateBullets();
         }
 
+        if (this.currentCycle % Const.UPDATES_PER_MOVE == 0) {
+            this.moveBots();
+        }
+
+
         this.checkCollisions();
         this.updateMap();
+    }
+
+    private void moveBots() {
+        for (Bot bot : this.bots) {
+            ImmutablePoint dest = this.moves.get(bot);
+
+            if (dest == null) {
+                return;
+            }
+
+
+            double dx = dest.getX() * Const.TILE_SIZE - bot.getX();
+            double dy = dest.getY() * Const.TILE_SIZE - bot.getY();
+
+            bot.setX(bot.getX() + dx / (Const.MOVES_PER_GRID_MOVE - 1));
+            bot.setY(bot.getY() + dy / (Const.MOVES_PER_GRID_MOVE - 1));
+
+            Rectangle hitbox = bot.getHitbox();
+            hitbox.x = (int) bot.getX();
+            hitbox.y = (int) bot.getY();
+        }
     }
 
     /**
      * Updates the state and position of the bots.
      */
     private void updateBots() {
+        for (Bot bot : this.bots) {
+            ImmutablePoint dest = this.moves.get(bot);
+
+            if (dest == null) {
+                continue;
+            }
+
+            bot.setX(dest.getX() * Const.TILE_SIZE);
+            bot.setY(dest.getY() * Const.TILE_SIZE);
+            Rectangle hitbox = bot.getHitbox();
+            hitbox.x = (int) bot.getX();
+            hitbox.y = (int) bot.getY();
+        }
+
         Map<ImmutablePoint, List<Pair<Bot, ImmutablePoint>>> moveRegistry = new HashMap<>();
 
-        for (int y = 0; y < this.map.length; y++) {
-            for (int x = 0; x < this.map[y].length; x++) {
-                GameObject currentObj = this.map[y][x];
+        for (Bot bot : this.bots) {
+            ImmutablePoint point = new ImmutablePoint((int) bot.getX() / Const.TILE_SIZE, (int) bot.getY() / Const.TILE_SIZE);
+            GameMap gameMap = new GameMap(this.map, bot, point);
 
-                if (currentObj == null) {
-                    continue;
-                }
+            ImmutablePoint newPos = this.handlePlayer(bot, gameMap);
 
-                if (currentObj instanceof Bot) {
-                    Bot bot = (Bot) currentObj;
-                    ImmutablePoint point = new ImmutablePoint(x, y);
-                    GameMap gameMap = new GameMap(this.map, bot, point);
-
-                    ImmutablePoint newPos = this.handlePlayer(bot, gameMap);
-
-                    moveRegistry.putIfAbsent(newPos, new ArrayList<>());
-                    moveRegistry.get(newPos).add(new Pair<>(bot, point));
-                }
-            }
+            moveRegistry.putIfAbsent(newPos, new ArrayList<>());
+            moveRegistry.get(newPos).add(new Pair<>(bot, point));
         }
 
         // Moves the player
@@ -203,7 +236,6 @@ public class GamePanel extends JPanel {
                 botInfo = bots.get(0);
             }
 
-            ImmutablePoint prevPosition = botInfo.getSecond();
             Bot bot = botInfo.getFirst();
 
             UnpositionedGameObject currentObject = this.map[position.getY()][position.getX()];
@@ -213,14 +245,12 @@ public class GamePanel extends JPanel {
                 Gas gas = (Gas) currentObject;
 
                 bot.setGas(bot.getGas() + gas.getGas());
+
+                this.map[position.getY()][position.getX()] = null;
             }
 
-            this.map[prevPosition.getY()][prevPosition.getX()] = null;
-            this.map[position.getY()][position.getX()] = bot;
-
-            // Update player hitbox
-            bot.getHitbox().x = position.getX() * Const.TILE_SIZE;
-            bot.getHitbox().y = position.getY() * Const.TILE_SIZE;
+            // Set the player for the move
+            this.moves.put(bot, position);
         }
     }
 
@@ -263,16 +293,16 @@ public class GamePanel extends JPanel {
                         Obstacle obstacle = (Obstacle) gameObject;
 
                         obstacle.bounce(bullet);
-                    } else if (gameObject instanceof Bot) {
-                        Bot bot = (Bot) gameObject;
+                    }
+                }
+            }
 
-                        if (bot.getHitbox().intersects(bullet.getHitbox())) {
-                            if (bot.getHealth() > 0) {
-                                bot.setHealth(bot.getHealth() - 1); // TODO: dynamic damage?
-                                bot.startHurtAnimation();
-                                bulletIterator.remove();
-                            }
-                        }
+            for (Bot bot : this.bots) {
+                if (bot.getHitbox().intersects(bullet.getHitbox())) {
+                    if (bot.getHealth() > 0) {
+                        bot.setHealth(bot.getHealth() - 1); // TODO: dynamic damage?
+                        bot.startHurtAnimation();
+                        bulletIterator.remove();
                     }
                 }
             }
@@ -306,24 +336,7 @@ public class GamePanel extends JPanel {
      * Checks the state of all game objects and removes any needed.
      */
     private void updateMap() {
-        for (int y = 0; y < this.map.length; y++) {
-            for (int x = 0; x < this.map[y].length; x++) {
-                GameObject currentObj = this.map[y][x];
-
-                if (currentObj == null) {
-                    continue;
-                }
-
-                if (currentObj instanceof Bot) {
-                    Bot bot = (Bot) currentObj;
-
-                    if (bot.getHealth() <= 0) {
-                        this.map[y][x] = null;
-                    }
-                }
-            }
-        }
-
+        this.bots.removeIf(curr -> curr.getHealth() <= 0);
         this.bullets.removeIf(curr -> curr.getState() == Bullet.State.DEAD);
     }
 
@@ -367,7 +380,7 @@ public class GamePanel extends JPanel {
      */
     private ImmutablePoint handlePlayer(Bot bot, GameMap gameMap) {
         Action action = bot.nextAction(gameMap);
-        ImmutablePoint position = gameMap.getPosition();
+        ImmutablePoint position = gameMap.getBotPosition();
 
         if (action == null) {
             return position;
@@ -404,14 +417,12 @@ public class GamePanel extends JPanel {
             Shoot shoot = (Shoot) action;
 
             // Generates the bullets along the velocity vector, but outside the player's hitbox
-            int gridX = position.getX();
-            int gridY = position.getY();
 
-            int x = gridX * Const.TILE_SIZE;
-            int y = gridY * Const.TILE_SIZE;
+            int x = (int) bot.getX();
+            int y = (int) bot.getY();
 
-            int centerX = (int) (x + Bullet.RADIUS);
-            int centerY = (int) (y + Bullet.RADIUS);
+            int centerX = x + Const.TILE_SIZE / 2;
+            int centerY = y + Const.TILE_SIZE / 2;
 
             Vector bulletVelocity = new Vector(Bullet.BULLET_SPEED, shoot.getAngle());
             double distance = Const.TILE_SIZE / 2.0 + Bullet.RADIUS;
@@ -433,7 +444,7 @@ public class GamePanel extends JPanel {
             bot.setGas(bot.getGas() - 1);
         }
 
-		return position;
+        return position;
     }
 
     /**
@@ -471,6 +482,10 @@ public class GamePanel extends JPanel {
 
                 currentObject.draw(g, xCoord, yCoord);
             }
+        }
+
+        for (Bot bot : this.bots) {
+            bot.draw(g);
         }
 
         for (Bullet bullet : this.bullets) {

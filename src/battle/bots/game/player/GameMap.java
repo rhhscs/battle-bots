@@ -26,6 +26,7 @@ public class GameMap {
     //private final Move[][][][] pathfindCache;
     private final Map<ImmutablePoint, Map<ImmutablePoint, Move>> pathfindCache;
     private final Bot bot;
+    // The position of the bot as grid coordinates
     private final ImmutablePoint botPosition;
 
 
@@ -39,7 +40,7 @@ public class GameMap {
         constructPathfind();
     }
 
-    public ImmutablePoint getPosition() {
+    public ImmutablePoint getBotPosition() {
         return this.botPosition;
     }
 
@@ -57,8 +58,8 @@ public class GameMap {
 
 
     private void constructPathfind() {
-        for (int y = 0; y <= this.map.length; y++){
-            for (int x = 0; x <= this.map[y].length; x++){
+        for (int y = 0; y < this.map.length; y++){
+            for (int x = 0; x < this.map[y].length; x++){
                 if (this.map[y][x] != null) {
                     constructPathfindSingle(new ImmutablePoint(x, y));
                 }

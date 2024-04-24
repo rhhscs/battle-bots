@@ -120,7 +120,6 @@ public class BattleBotsApplication {
             this.codeView.resetText();
         }
 
-        System.out.println(filename);
         String text = this.botRegistry.get(filename);
 
         if (text == null) {
@@ -151,7 +150,8 @@ public class BattleBotsApplication {
                     Bot loadedBot = objectLoader.load(className, entry.getValue());
                     bots.add(loadedBot);
                 } catch (IOException | ObjectLoaderException ex) {
-                    System.out.println(ex.getMessage());
+                    codeView.updateText(ex.getMessage());
+                    return;
                 }
             }
 

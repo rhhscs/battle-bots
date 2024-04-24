@@ -58,7 +58,7 @@ public class ObjectLoader {
             Class<?> cls = Class.forName(className, true, classLoader);
             return (Bot) cls.getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException |InvocationTargetException | InstantiationException |
-                IllegalAccessException | NoSuchMethodException e) {
+                IllegalAccessException | NoSuchMethodException | NoClassDefFoundError e) {
             throw new ObjectLoaderException(e);
         } catch (ClassCastException e) {
             throw new ObjectLoaderException("Could not cast class" + className + " to a Bot instance.");

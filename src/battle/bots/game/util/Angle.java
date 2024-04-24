@@ -34,4 +34,11 @@ public class Angle {
         DEGREE,
         RADIAN,
     }
+
+    @Override
+    public String toString() {
+        return "Angle{" +
+                "val=" + this.asDegrees() +
+                '}';
+    }
 }

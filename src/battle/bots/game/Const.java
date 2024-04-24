@@ -5,13 +5,15 @@ public class Const {
 
     /** Game constants */
     public static final int TICKS_PER_UPDATE = 4;
-    public static final int MS_PER_TICK = 20;
+    public static final int MS_PER_TICK = 10;
     public static final int MS_PER_UPDATE = MS_PER_TICK * TICKS_PER_UPDATE;
 
-    public static final int UPDATES_PER_MOVE = 4;
-    public static final int MS_PER_MOVE = MS_PER_UPDATE * UPDATES_PER_MOVE;
-    public static final double S_PER_MOVE = MS_PER_MOVE / 1000.0;
+    public static final int UPDATES_PER_GRID_MOVE = 4;
+    public static final int UPDATES_PER_MOVE = 1;
 
+    public static final int MS_PER_MOVE = MS_PER_UPDATE * UPDATES_PER_GRID_MOVE;
+    public static final double S_PER_MOVE = MS_PER_MOVE / 1000.0;
+    public static final int MOVES_PER_GRID_MOVE = UPDATES_PER_GRID_MOVE / UPDATES_PER_MOVE;
     public static final int UPDATES_PER_BULLET_MOVE = 1;
     public static final int MS_PER_BULLET_MOVE = MS_PER_UPDATE * UPDATES_PER_BULLET_MOVE;
     public static final double S_PER_BULLET_MOVE = MS_PER_BULLET_MOVE / 1000.0;

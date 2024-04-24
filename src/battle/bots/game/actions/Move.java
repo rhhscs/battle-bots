@@ -1,6 +1,8 @@
 package battle.bots.game.actions;
 
+import battle.bots.game.Const;
 import battle.bots.game.player.GameMap;
+import battle.bots.game.util.Vector;
 
 /**
  * An object returned from the {@link battle.bots.game.objects.Bot#update(GameMap)} to
@@ -25,6 +27,13 @@ public class Move implements Action {
      */
     public Direction getDirection() {
         return this.direction;
+    }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+                "direction=" + this.direction +
+                '}';
     }
 
     /**

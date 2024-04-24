@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,7 +19,7 @@ import java.util.TimerTask;
  * @author Harry Xu
  * @version 1.0 - March 24th 2024
  */
-public abstract class Bot extends UnpositionedGameObject {
+public abstract class Bot extends PositionedGameObject {
     private static final int DAMAGE_ANIMATION_LENGTH = Const.MS_PER_TICK * 2;
     private static final int DEFAULT_HEALTH = 10;
     private static final int DEFAULT_GAS = 10;
@@ -41,7 +42,7 @@ public abstract class Bot extends UnpositionedGameObject {
      * Constructs a {@link Bot}.
      */
     public Bot() {
-        super(new Rectangle(0, 0, Const.TILE_SIZE, Const.TILE_SIZE));
+        super(new Rectangle(0, 0, Const.TILE_SIZE, Const.TILE_SIZE), 0, 0);
         this.health = DEFAULT_HEALTH;
         this.gas = DEFAULT_GAS;
         this.color = new Color((float) Math.random(), (float)Math.random(), (float)Math.random());
@@ -152,20 +153,18 @@ public abstract class Bot extends UnpositionedGameObject {
     public abstract Action update(GameMap gameMap);
 
     /**
-     * Draws the {@link GameObject} at the specified location.
+     * Draws the {@link GameObject} at its location.
      * @param g the {@link Graphics} object
-     * @param x the x coordinate of the top left corner of the drawing location
-     * @param y the y coordinate of the top left corner of the drawing location
      */
     @Override
-    public void draw(Graphics g, int x, int y) {
+    public void draw(Graphics g) {
         if (this.spriteState == SpriteState.NORMAL) {
             g.setColor(this.color);
         } else if (this.spriteState == SpriteState.HURT) {
             g.setColor(Color.RED);
         }
 
-        g.fillRect(x, y, Const.TILE_SIZE, Const.TILE_SIZE);
+        g.fillRect((int) this.getX(), (int) this.getY(), Const.TILE_SIZE, Const.TILE_SIZE);
 //        Image sprite = this.sprites[this.currentSprite];
 //        g.drawImage(sprite, x, y, null);
     }
@@ -177,6 +176,26 @@ public abstract class Bot extends UnpositionedGameObject {
     public void tick() {
         // TODO
         // this.currentSprite = (this.currentSprite + 1) % this.sprites.length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        // TODO
+
+        Bot bot = (Bot) o;
+        return Objects.equals(name, bot.name);
+    }
+
+    @Override
+    public int hashCode() {
+        // TODO
+        return Objects.hash(name);
     }
 
     /**
