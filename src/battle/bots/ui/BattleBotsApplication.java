@@ -1,5 +1,7 @@
 package battle.bots.ui;
 
+import battle.bots.Main;
+import battle.bots.game.assets.Assets;
 import battle.bots.game.objects.GamePanel;
 import battle.bots.game.objects.Bot;
 import battle.bots.loader.ObjectLoader;
@@ -19,8 +21,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

@@ -1,22 +1,35 @@
 package battle.bots.game.assets;
 
+import battle.bots.game.Const;
+
 import javax.imageio.ImageIO;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Singleton class to allow for global access to assets (e.g. sprites and fonts) .
- * @author Tommy Shan
- * @version 1.0 - January 10th 2024
+ * @author Harry Xu
+ * @version 1.0 - March 23rd 2024
  */
 public class Assets {
     /** Singleton instance */
@@ -77,19 +90,18 @@ public class Assets {
     /**
      * Loads, initializes, and processes the assets,
      * and sets the instance to the {@link #instance} variable.
-     * @param size the size to load the sprites to
      * @throws IOException if an I/O error occur while reading the files
      */
-    public static void initialize(int size) throws IOException {
+    public static void initialize() throws IOException {
         if (instance != null) {
             return;
         }
 
         instance = new Assets(
-                new PlayerAssets(size),
-                new TileAssets(size),
-                new BulletAssets(size),
-                new ObstacleAssets(size)
+                new PlayerAssets(Const.TILE_SIZE),
+                new TileAssets(Const.TILE_SIZE),
+                new BulletAssets(Const.TILE_SIZE),
+                new ObstacleAssets(Const.TILE_SIZE)
         );
     }
 
@@ -99,7 +111,7 @@ public class Assets {
      */
     public static Assets getInstance() {
         if (instance == null) {
-            throw new IllegalStateException("Sprites not initialized");
+            throw new IllegalStateException("The 'assets' instance is not initialized.");
         }
 
         return instance;
@@ -113,15 +125,21 @@ public class Assets {
      */
     private static Map.Entry<String, Image[]> processImage(Map.Entry<Path, List<Path>> entry, int size) {
         String color = entry.getKey().toString();
-        List<Path> files = entry.getValue();
+        List<Path> resources = entry.getValue();
 
-        Image[] images = new Image[files.size()];
+        Image[] images = new Image[resources.size()];
 
-        for (int i = 0; i < files.size(); i++) {
-            File file = files.get(i).toFile();
+        for (int i = 0; i < resources.size(); i++) {
+            Path resource = resources.get(i);
+
+            InputStream stream = Assets.class.getResourceAsStream(resource.toString());
+
+            if (stream == null) {
+                throw new IllegalArgumentException("Resource '" + resource + "' cannot be found.");
+            }
 
             try {
-                images[i] = ImageIO.read(file).getScaledInstance(size, size, Image.SCALE_DEFAULT);
+                images[i] = ImageIO.read(stream).getScaledInstance(size, size, Image.SCALE_DEFAULT);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -145,12 +163,43 @@ public class Assets {
     /**
      * Loads all images within a root directory and
      * categorizes them by the name of their parent directory.
-     * @param root the root directory
+     * @param root the root resource directory
      * @param size the resized size of the images
      * @return a map of parent directory names to images
      */
-    public static Map<String, Image[]> loadAndGroupImages(Path root, int size) throws IOException {
-        try (Stream<Path> paths = Files.walk(root)) {
+    public static Map<String, Image[]> loadAndGroupImages(String root, int size) throws IOException, URISyntaxException {
+        URL url = Assets.class.getResource(root);
+
+        if (url == null) {
+            throw new IllegalStateException("Resource root '" + root + "' cannot be found");
+        }
+
+        URI uri = url.toURI();
+
+        Path resourcePath;
+
+        if (uri.getScheme().equals("jar")) {
+            String systemRoot = uri.toString().split("!")[0];
+            URI systemRootURI = URI.create(systemRoot);
+
+            try (FileSystem fileSystem = FileSystems.newFileSystem(systemRootURI, Collections.emptyMap())) {
+                resourcePath = fileSystem.getPath("/sprites");
+
+                try (Stream<Path> paths = Files.walk(resourcePath)) {
+                    // Read and process sprites with stream API
+
+                    return paths
+                            .filter(Files::isRegularFile)
+                            .collect(Collectors.groupingBy(path -> path.getName(path.getNameCount() - 2)))
+                            .entrySet()
+                            .stream()
+                            .map(processImage(size))
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                }
+            }
+        }
+
+        try (Stream<Path> paths = Files.walk(Paths.get(uri))) {
             // Read and process sprites with stream API
             return paths
                     .filter(Files::isRegularFile)
@@ -160,5 +209,19 @@ public class Assets {
                     .map(processImage(size))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
+    }
+
+    public static List<String> loadFiles(String directory) throws IOException {
+        List<String> fileNames = new ArrayList<>();
+        URL resourceUrl = Assets.class.getResource(directory);
+
+        JarInputStream jarInputStream = (JarInputStream) resourceUrl.openStream();
+        JarEntry jarEntry;
+
+        while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {
+            fileNames.add(jarEntry.getName());
+        }
+
+        return fileNames;
     }
 }
