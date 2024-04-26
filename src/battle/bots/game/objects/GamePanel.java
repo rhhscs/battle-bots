@@ -48,6 +48,8 @@ public class GamePanel extends JPanel {
     public GamePanel(List<Bot> bots) {
         this.camera = new Camera();
 
+        bots.forEach(bot -> bot.setName(bot.getClass().getName()));
+
         // Game map dimensions
         int gridHeight = (int) Math.floor(
                 Math.sqrt(

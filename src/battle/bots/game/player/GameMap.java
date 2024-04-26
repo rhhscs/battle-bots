@@ -33,7 +33,7 @@ public class GameMap {
     public GameMap(GameObject[][] map, Bot bot, ImmutablePoint botPosition) {
         this.map = map;
         this.pathfindCache = new HashMap<>();
-        //this.pathfindCache = new Move[map.length][map[0].length][map.length][map[0].length];
+//        this.pathfindCache = new Move[map.length][map[0].length][map.length][map[0].length];
         this.bot = bot;
         this.botPosition = botPosition;
 
@@ -44,7 +44,8 @@ public class GameMap {
         return this.botPosition;
     }
 
-    public Move pathfind(ImmutablePoint start, ImmutablePoint dest) {
+    public Move pathfind(ImmutablePoint dest) {
+        ImmutablePoint start = this.botPosition;
         if (this.map[start.getY()][start.getX()] == null || this.map[dest.getY()][dest.getX()] == null) {
             return null;
         }

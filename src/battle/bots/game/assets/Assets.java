@@ -5,6 +5,7 @@ import battle.bots.game.Const;
 import javax.imageio.ImageIO;
 import java.awt.Image;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -123,7 +124,7 @@ public class Assets {
      * @param size the resized size of the images
      * @return the transformed entry
      */
-    private static Map.Entry<String, Image[]> processImage(Map.Entry<Path, List<Path>> entry, int size) {
+    private static Map.Entry<String, Image[]> processImage(Map.Entry<Path, List<Path>> entry, int size, boolean isJar) {
         String color = entry.getKey().toString();
         List<Path> resources = entry.getValue();
 
@@ -132,7 +133,17 @@ public class Assets {
         for (int i = 0; i < resources.size(); i++) {
             Path resource = resources.get(i);
 
-            InputStream stream = Assets.class.getResourceAsStream(resource.toString());
+            InputStream stream;
+
+            if (isJar) {
+                stream = Assets.class.getResourceAsStream(resource.toString());
+            } else {
+                try {
+                    stream = Files.newInputStream(resource);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
             if (stream == null) {
                 throw new IllegalArgumentException("Resource '" + resource + "' cannot be found.");
@@ -150,14 +161,15 @@ public class Assets {
 
     /**
      * Helper function which partially applies the
-     * {@link Assets#processImage(Map.Entry, int)} method with a size parameter.
+     * {@link Assets#processImage(Map.Entry, int, boolean)} method with a size parameter.
      * @param size the resized size of the images
+     * @param isJar if to process the image in a jar file or not
      * @return a partially applied function which maps an
      * entry of directories to image paths into an
      * entry of directory names to resized images
      */
-    public static Function<Map.Entry<Path, List<Path>>, Map.Entry<String, Image[]>> processImage(int size) {
-        return (Map.Entry<Path, List<Path>> entry) -> processImage(entry, size);
+    public static Function<Map.Entry<Path, List<Path>>, Map.Entry<String, Image[]>> processImage(int size, boolean isJar) {
+        return (Map.Entry<Path, List<Path>> entry) -> processImage(entry, size, isJar);
     }
 
     /**
@@ -176,52 +188,33 @@ public class Assets {
 
         URI uri = url.toURI();
 
-        Path resourcePath;
-
         if (uri.getScheme().equals("jar")) {
             String systemRoot = uri.toString().split("!")[0];
             URI systemRootURI = URI.create(systemRoot);
 
             try (FileSystem fileSystem = FileSystems.newFileSystem(systemRootURI, Collections.emptyMap())) {
-                resourcePath = fileSystem.getPath("/sprites");
+                Path resourcePath = fileSystem.getPath("/sprites");
 
                 try (Stream<Path> paths = Files.walk(resourcePath)) {
                     // Read and process sprites with stream API
-
-                    return paths
-                            .filter(Files::isRegularFile)
-                            .collect(Collectors.groupingBy(path -> path.getName(path.getNameCount() - 2)))
-                            .entrySet()
-                            .stream()
-                            .map(processImage(size))
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    return toImageMap(paths, size, true);
                 }
             }
         }
 
         try (Stream<Path> paths = Files.walk(Paths.get(uri))) {
             // Read and process sprites with stream API
-            return paths
-                    .filter(Files::isRegularFile)
-                    .collect(Collectors.groupingBy(path -> path.getName(path.getNameCount() - 2)))
-                    .entrySet()
-                    .stream()
-                    .map(processImage(size))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return toImageMap(paths, size, false);
         }
     }
 
-    public static List<String> loadFiles(String directory) throws IOException {
-        List<String> fileNames = new ArrayList<>();
-        URL resourceUrl = Assets.class.getResource(directory);
-
-        JarInputStream jarInputStream = (JarInputStream) resourceUrl.openStream();
-        JarEntry jarEntry;
-
-        while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {
-            fileNames.add(jarEntry.getName());
-        }
-
-        return fileNames;
+    public static Map<String, Image[]> toImageMap(Stream<Path> paths, int size, boolean isJar) {
+        return paths
+            .filter(Files::isRegularFile)
+            .collect(Collectors.groupingBy(path -> path.getName(path.getNameCount() - 2)))
+            .entrySet()
+            .stream()
+            .map(processImage(size, isJar))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

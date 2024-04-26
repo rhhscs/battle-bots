@@ -11,11 +11,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 public class Main {
     public static void main(String[] args) {
-//        try {
-//            System.out.println(Assets.loadAndGroupImages("/sprites", Const.TILE_SIZE));
-//        } catch (IOException | URISyntaxException e) {
-//            e.printStackTrace();
-//        }
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | UnsupportedLookAndFeelException | InstantiationException |

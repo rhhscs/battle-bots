@@ -150,6 +150,7 @@ public class BattleBotsApplication {
             for (Map.Entry<String, String> entry : botRegistry.entrySet()) {
                 // Remove .java extension
                 String className = entry.getKey().substring(0, entry.getKey().indexOf("."));
+
                 try {
                     Bot loadedBot = objectLoader.load(className, entry.getValue());
                     bots.add(loadedBot);
@@ -160,7 +161,6 @@ public class BattleBotsApplication {
             }
 
             System.out.println(bots);
-
 
             frame.remove(mainPanel);
 
